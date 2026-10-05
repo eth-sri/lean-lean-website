@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LeanLean Benchmark</title>
+<meta name="author" content="Kári Rögnvaldsson, Niels Mündler-Sasahara, Jasper Dekoninck, Martin Vechev">
+<meta name="description" content="LeanLean: can coding agents make a verified Lean 4 library smaller while keeping its theorems? Leaderboard and a before/after explorer for all 64 repositories.">
+<!-- Link previews. Crawlers need absolute URLs: change SITE (https://eth-sri.github.io/lean-lean-website/) here
+     if the site moves. The card is rendered by pipeline/build_og.py. -->
+<link rel="canonical" href="https://eth-sri.github.io/lean-lean-website/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LeanLean Benchmark">
+<meta property="og:url" content="https://eth-sri.github.io/lean-lean-website/">
+<meta property="og:title" content="LeanLean: Benchmarking Repository-Scale Lean Proof Compression">
+<meta property="og:description" content="Can coding agents compress real Lean proofs? 64 repositories, 12 hours each, every protected theorem still checked. Leaderboard, and every agent's edits token by token.">
+<meta property="og:image" content="https://eth-sri.github.io/lean-lean-website/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="LeanLean leaderboard: average share of Lean tokens removed, Opus 5.5 64.3%, Opus 5 48.3%, Sol 6.1 39.9%, Sol 5.6 37.8%, Gemini 3.8 Flash 21.7%, Muse Spark 1.3 17.4%, Luna 5.6 13.1%, Leanstral 1.5 0.6%.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LeanLean: Benchmarking Repository-Scale Lean Proof Compression">
+<meta name="twitter:description" content="Can coding agents compress real Lean proofs? Leaderboard, and every agent's edits token by token.">
+<meta name="twitter:image" content="https://eth-sri.github.io/lean-lean-website/assets/og.png">
+<meta name="theme-color" content="#fbfcfc">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/site.css?v=c501c773d4">
+<link rel="modulepreload" href="assets/js/main.js?v=c501c773d4">
+<link rel="modulepreload" href="assets/js/util.js?v=c501c773d4">
+<link rel="modulepreload" href="assets/js/leaderboard.js?v=c501c773d4">
+<link rel="preload" href="data/leaderboard.json" as="fetch" crossorigin="anonymous">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23173F55'/%3E%3Ctext x='16' y='22.5' text-anchor='middle' font-family='Georgia,serif' font-size='18' fill='white'%3E%E2%8A%A2%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<main id="view" tabindex="-1"><div class="loading">Loading benchmark…</div></main>
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<script type="module" src="assets/js/main.js?v=c501c773d4"></script>
+</body>
+</html>

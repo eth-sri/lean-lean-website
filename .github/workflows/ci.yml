@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # The site's data (~500 MB) is not needed to check its code.
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            pipeline
+            site/assets
+            site/index.html
+          sparse-checkout-cone-mode: false
+      - name: Asset version stamps are current
+        run: |
+          python3 pipeline/stamp_assets.py
+          git diff --exit-code || { echo "::error::Stale ?v= stamps. Run: uv run python pipeline/stamp_assets.py"; exit 1; }
+      - name: JavaScript parses
+        run: |
+          for f in site/assets/js/*.js; do
+            cp "$f" "$RUNNER_TEMP/check.mjs"
+            node --check "$RUNNER_TEMP/check.mjs" || { echo "::error file=$f::syntax error"; exit 1; }
+          done
