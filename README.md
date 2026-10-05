@@ -1,6 +1,6 @@
 # LeanLean website
 
-The website of the LeanLean benchmark: <https://eth-sri.github.io/lean-lean-website/>
+The website of the LeanLean benchmark: <https://leanleanbench.com/>
 
 It shows the leaderboard and, for every model and repository, what the agent changed:
 a dependency graph, a code diff, and the agent's full trace.
