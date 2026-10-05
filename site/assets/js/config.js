@@ -2,13 +2,15 @@
 // tools, limits, the task prompt and the harness's own system prompt. Every
 // value comes from the frozen run manifests (pipeline/export_benchmark.py,
 // run_configs); the system prompts load only when one is opened.
-import { h, load, logo, usd } from './util.js?v=d761479e3b';
+import { h, load, logo, usd } from './util.js?v=b56d6e059b';
 
 let dialog = null;
 
 const number = (value) => (typeof value === 'number' && Math.abs(value) >= 1000 ? value.toLocaleString('en-US') : String(value));
 const memory = (text) => text.replace(/^(\d+(?:\.\d+)?)g$/i, '$1 GiB');
 const duration = (text) => text.replace(/^(\d+)h$/, '$1 hours');
+const rate = (value) => `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 3 })}`;
+const RATE_LABELS = { input: 'Input', cache_read: 'Cached input', cache_write: 'Cache write', output: 'Output' };
 
 // The task prompt as the agents saw it: the container limits filled in, the
 // start time and deadline (different for every run) left as placeholders.
@@ -102,7 +104,10 @@ export function openModelConfig(board, short, onClose) {
         h('dl', { class: 'cfg-list' },
           h('div', { class: 'cfg-row' }, h('dt', {}, 'Per repository'), h('dd', {},
             h('span', { class: 'cfg-val' }, usd(model.cost)),
-            model.cost_note ? h('p', { class: 'cfg-note' }, model.cost_note) : null)))),
+            model.cost_note ? h('p', { class: 'cfg-note' }, model.cost_note) : null)),
+          Object.entries(config.rates).map(([kind, value]) => h('div', { class: 'cfg-row' },
+            h('dt', {}, RATE_LABELS[kind]),
+            h('dd', {}, h('span', { class: 'cfg-val' }, rate(value)), h('span', { class: 'cfg-unit' }, 'per million tokens')))))),
       h('section', {},
         h('h3', {}, 'Task prompt'),
         h('p', { class: 'cfg-lede' }, 'The same for every model.'),
