@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=c501c773d4';
+import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=d761479e3b';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },

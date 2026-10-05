@@ -9,8 +9,8 @@
 //   #/model/<model>             a model's run configuration, over whatever is open
 // <model> is an agent's short key, or `prep` for the repository before and after preprocessing.
 // Every address is a link that can be shared: the viewer keeps it in step with what is open.
-import { h, load, registerLogos } from './util.js?v=c501c773d4';
-import { renderLeaderboard, renderMethod, renderCitation } from './leaderboard.js?v=c501c773d4';
+import { h, load, registerLogos } from './util.js?v=d761479e3b';
+import { renderLeaderboard, renderMethod, renderCitation } from './leaderboard.js?v=d761479e3b';
 // The repository viewer (diff, graph, charts) and the full benchmark data load
 // only when a repository is opened; the leaderboard needs one small file.
 
@@ -27,8 +27,8 @@ let panel = null;     // full-width host for the repository viewer
 let cleanup = null;   // tears down the current repository viewer
 let shownRepo = null;
 let openedFrom = null; // the address before a model's configuration was opened
-const loadRepoPage = () => import('./repo.js?v=c501c773d4');
-const loadConfig = () => import('./config.js?v=c501c773d4');
+const loadRepoPage = () => import('./repo.js?v=d761479e3b');
+const loadConfig = () => import('./config.js?v=d761479e3b');
 // Colours the scripts compute (heatmap ramp, graph, origin bars) are read from
 // site.css's custom properties. Not every browser holds module scripts until the
 // stylesheet has applied, and on a cold load an empty property turns the whole
@@ -132,6 +132,7 @@ window.addEventListener('hashchange', (event) => {
   const from = new URL(event.oldURL).hash;
   if (location.hash.startsWith('#/model/') && !from.startsWith('#/model/')) openedFrom = from;
   route();
+  window.goatcounter?.count?.({ referrer: event.oldURL });
 });
 window.addEventListener('leaderboard:redraw', () => {
   if (!boardEl) return;
