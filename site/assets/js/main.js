@@ -9,8 +9,8 @@
 //   #/model/<model>             a model's run configuration, over whatever is open
 // <model> is an agent's short key, or `prep` for the repository before and after preprocessing.
 // Every address is a link that can be shared: the viewer keeps it in step with what is open.
-import { h, load, registerLogos } from './util.js?v=c650db202f';
-import { renderLeaderboard, renderMethod, renderCitation } from './leaderboard.js?v=c650db202f';
+import { h, load, registerLogos } from './util.js?v=6082c9e522';
+import { renderLeaderboard, renderMethod, renderCitation } from './leaderboard.js?v=6082c9e522';
 // The repository viewer (diff, graph, charts) and the full benchmark data load
 // only when a repository is opened; the leaderboard needs one small file.
 
@@ -27,8 +27,8 @@ let panel = null;     // full-width host for the repository viewer
 let cleanup = null;   // tears down the current repository viewer
 let shownRepo = null;
 let openedFrom = null; // the address before a model's configuration was opened
-const loadRepoPage = () => import('./repo.js?v=c650db202f');
-const loadConfig = () => import('./config.js?v=c650db202f');
+const loadRepoPage = () => import('./repo.js?v=6082c9e522');
+const loadConfig = () => import('./config.js?v=6082c9e522');
 // Colours the scripts compute (heatmap ramp, graph, origin bars) are read from
 // site.css's custom properties. Not every browser holds module scripts until the
 // stylesheet has applied, and on a cold load an empty property turns the whole

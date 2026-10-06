@@ -2,7 +2,7 @@
 // tools, limits, the task prompt and the harness's own system prompt. Every
 // value comes from the frozen run manifests (pipeline/export_benchmark.py,
 // run_configs); the system prompts load only when one is opened.
-import { h, load, logo, usd } from './util.js?v=c650db202f';
+import { h, load, logo, usd } from './util.js?v=6082c9e522';
 
 let dialog = null;
 

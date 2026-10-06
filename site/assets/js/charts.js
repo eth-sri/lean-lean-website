@@ -1,6 +1,6 @@
 // Hand-drawn SVG chart in the paper's visual language: thin marks, recessive
 // axes, direct labels, a hover layer on every mark.
-import { s, esc, showTip, hideTip, cssVar, ORIGIN, tokens, signedInt, inkOn, hexToRgb } from './util.js?v=c650db202f';
+import { s, esc, showTip, hideTip, cssVar, ORIGIN, tokens, signedInt, inkOn, hexToRgb } from './util.js?v=6082c9e522';
 
 // Drawing width: narrower on phones so text stays legible when scaled down.
 const cw = (container) => ((container.clientWidth || 720) < 560 ? 480 : 720);

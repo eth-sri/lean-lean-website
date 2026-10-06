@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=c650db202f';
+import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=6082c9e522';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -268,15 +268,15 @@ export function renderLeaderboard(view, bench) {
   // opening on the frontier, with the leaderboard's summary and per-repository
   // columns as separate tabs (see site.css).
   const board = boardTable(bench);
-  // How a score is counted: under the frontier, and on a phone, where the panels
-  // are tabs, under the leaderboard's two tabs as well.
+  // How a score is counted: from 760px above the frontier chart, on a phone below
+  // each tab's chart or table (see site.css).
   const scoreNote = 'Score is mean Lean token compression across repositories. A failed build or Comparator check scores zero.';
   const panels = {
     board: h('div', { class: 'result-panel board-panel', id: 'results-board', role: 'tabpanel' },
-      h('div', { class: 'panel-head' }, h('h2', {}, 'Leaderboard'), h('p', { class: 'tab-note' }, scoreNote)), board),
+      h('h2', {}, 'Leaderboard'), board, h('p', { class: 'tab-note' }, scoreNote)),
     frontier: h('div', { class: 'result-panel frontier-panel', id: 'results-frontier', role: 'tabpanel' },
       h('div', { class: 'panel-head' }, h('h2', {}, 'Frontier'), h('p', {}, scoreNote)),
-      frontierChart(models)),
+      frontierChart(models), h('p', { class: 'tab-note' }, scoreNote)),
   };
   const body = h('div', { class: 'results-body', 'data-tab': 'frontier' }, panels.frontier, panels.board);
   const tabs = [['frontier', 'Frontier', panels.frontier], ['summary', 'Leaderboard', panels.board], ['repos', 'Per repository', panels.board]]

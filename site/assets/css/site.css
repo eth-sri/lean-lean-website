@@ -706,8 +706,8 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 .result-panel { display: grid; gap: 20px; min-width: 0; }
 .result-panel h2 { font-size: 1.75rem; }
 .panel-head { display: grid; gap: 6px; }
-.panel-head p { max-width: 64ch; color: var(--ink-2); }
-.results-tabs { display: flex; gap: clamp(14px, 5vw, 24px); border-bottom: 1px solid var(--rule); }
+.panel-head p, .tab-note { max-width: 64ch; color: var(--ink-2); }
+.results-tabs { display: flex; gap: clamp(10px, 3.5vw, 18px); border-bottom: 1px solid var(--rule); }
 .results-tabs button {
   border: 0; background: none; cursor: pointer; padding: 6px 0 8px; margin-bottom: -1px;
   border-bottom: 2px solid transparent; color: var(--muted); font-weight: 500; white-space: nowrap;
@@ -716,7 +716,8 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 .results-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 @media (min-width: 760px) { .results-tabs, .tab-note { display: none; } }
 @media (max-width: 759.98px) {
-  .result-panel h2,
+  .result-panel { gap: 12px; }
+  .result-panel h2, .panel-head,
   .results-body[data-tab="frontier"] .board-panel,
   .results-body:not([data-tab="frontier"]) .frontier-panel { display: none; }
 }
@@ -740,6 +741,8 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
   .lb-wrap:not(.per-repo) .lb-hint,
   .lb-wrap:not(.per-repo) table.lb :is(tr.bands, .rh, .rc) { display: none; }
   .lb-wrap:not(.per-repo) .lb-scroll { padding-bottom: 0; }
+  /* The per-repository tab drops cost and time, so the squares start beside the score. */
+  .lb-wrap.per-repo table.lb :is(.fx-cost, .fx-time) { display: none; }
   .lb-wrap:not(.per-repo) table.lb { width: 100%; }
   /* 12px inside the frame on both sides, 12px between the number columns. */
   .lb-wrap:not(.per-repo) table.lb .fx { position: static; box-shadow: none; }
