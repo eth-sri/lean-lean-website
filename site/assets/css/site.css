@@ -723,6 +723,7 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 .chart.frontier svg { overflow: visible; }
 .chart.frontier .pt rect { fill: var(--surface); stroke-width: 1.5; }
 .chart.frontier .pt { color: var(--ink); }
+.chart.frontier .label, .chart.frontier .axis-title { font-weight: 400; }
 .chart.frontier .pt:hover rect { stroke-width: 2.5; }
 .chart.frontier .frontier-line { fill: none; stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 5 4; stroke-linejoin: round; opacity: 0.6; }
 

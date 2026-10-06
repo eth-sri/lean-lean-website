@@ -12,7 +12,7 @@
 // A node's area is its size in Lean tokens; its shape is its kind: theorems
 // are circles, definitions squares, anything else (notation, macros, axioms)
 // triangles.
-import { cssVar } from './util.js?v=a50d33a09d';
+import { cssVar } from './util.js?v=e98656abd3';
 
 export const STATUS = ['unchanged', 'rewritten', 'structural', 'deleted', 'dead', 'comments'];
 

@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=a50d33a09d';
+import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=e98656abd3';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -101,14 +101,18 @@ function frontierChart(models) {
     + (m.scored < m.expected ? `<div class="note">Scored on ${m.scored} of ${m.expected} repositories; the rest are not finished yet.</div>` : ''));
   let drawn = 0;
   const draw = () => {
-    const W = Math.round(host.clientWidth);
     // Hidden (the other tab on a phone) or unchanged: nothing to do.
-    if (!W || W === drawn) return;
-    drawn = W;
+    if (!host.clientWidth || host.clientWidth === drawn) return;
+    drawn = host.clientWidth;
+    // The link-preview card (pipeline/build_og.py) sets data-zoom, data-height and
+    // data-mark: it draws at 1/zoom of its width, at a set height and with smaller
+    // logos, and the SVG scales up.
+    const zoom = +host.dataset.zoom || 1;
+    const W = Math.round(drawn / zoom);
     const narrow = W < 560;
-    const H = narrow ? 300 : W < 900 ? 360 : 400;
+    const H = +host.dataset.height || (narrow ? 300 : W < 900 ? 360 : 400);
     const L = narrow ? 36 : 44, R = W - (narrow ? 10 : 18), T = 30, B = H - 42;
-    const S = narrow ? 24 : 28, icon = Math.round(S * 0.58);
+    const S = +host.dataset.mark || (narrow ? 16 : 18), icon = Math.round(S * 0.58);
     const costs = pts.map((m) => m.cost);
     const lo = Math.log(Math.min(...costs) / 1.7), hi = Math.log(Math.max(...costs) * 1.7);
     const x = (c) => L + ((Math.log(c) - lo) / (hi - lo)) * (R - L);
@@ -140,31 +144,51 @@ function frontierChart(models) {
       s('polyline', { class: 'frontier-line', points: frontier.map((m) => `${x(m.cost)},${y(m.score)}`).join(' ') }));
 
     // Direct labels: beside each logo where there is room (right, left, above,
-    // below), placed from the top score down so leaders get first pick.
-    measure.font = `500 12px ${cssVar('--font-ui')}`;
+    // below, then above or below flush with either edge), placed from the top
+    // score down so leaders get first pick, backtracking when a later label
+    // would find no free spot.
+    measure.font = `400 12px ${cssVar('--font-ui')}`;
     const boxes = pts.map((m) => ({ x: x(m.cost) - S / 2 - 2, y: y(m.score) - S / 2 - 2, w: S + 4, h: S + 4 }));
     const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-    // The frontier line, as points every few pixels, so labels keep off it too.
+    // The frontier line, as small squares every few pixels, so labels keep clear of it too.
     const line = frontier.slice(1).flatMap((m, i) => {
       const [x0, y0, x1, y1] = [x(frontier[i].cost), y(frontier[i].score), x(m.cost), y(m.score)];
       const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 4);
-      return Array.from({ length: n + 1 }, (_, k) => ({ x: x0 + ((x1 - x0) * k) / n, y: y0 + ((y1 - y0) * k) / n, w: 0, h: 0 }));
+      return Array.from({ length: n + 1 }, (_, k) => ({ x: x0 + ((x1 - x0) * k) / n - 3, y: y0 + ((y1 - y0) * k) / n - 3, w: 6, h: 6 }));
     });
     const inside = (a) => a.x >= L - 4 && a.x + a.w <= W - 2 && a.y >= T - 6 && a.y + a.h <= B + 4;
-    const labels = [];
-    for (const m of [...pts].sort((a, b) => b.score - a.score)) {
-      const cx = x(m.cost), cy = y(m.score), r = S / 2 + 6;
-      const text = m.label, w = measure.measureText(text).width, lh = 14;
-      const options = [
+    const order = [...pts].sort((a, b) => b.score - a.score);
+    const options = order.map((m) => {
+      const cx = x(m.cost), cy = y(m.score), r = S / 2 + 6, e = S / 2;
+      const w = measure.measureText(m.label).width, lh = 14;
+      const above = { y: cy - r - lh + 2, ty: cy - r - 1 }, below = { y: cy + r - 2, ty: cy + r + 9 };
+      return [
         { x: cx + r, y: cy - lh / 2, anchor: 'start', tx: cx + r, ty: cy + 4 },
         { x: cx - r - w, y: cy - lh / 2, anchor: 'end', tx: cx - r, ty: cy + 4 },
-        { x: cx - w / 2, y: cy - r - lh + 2, anchor: 'middle', tx: cx, ty: cy - r - 1 },
-        { x: cx - w / 2, y: cy + r - 2, anchor: 'middle', tx: cx, ty: cy + r + 9 },
+        { ...above, x: cx - w / 2, anchor: 'middle', tx: cx },
+        { ...below, x: cx - w / 2, anchor: 'middle', tx: cx },
+        ...[above, below].flatMap((v) => [
+          { ...v, x: cx - e, anchor: 'start', tx: cx - e },
+          { ...v, x: cx + e - w, anchor: 'end', tx: cx + e },
+        ]),
       ].map((o) => ({ ...o, w, h: lh }));
-      const pick = options.find((o) => inside(o) && ![...boxes, ...labels, ...line].some((b) => hits(o, b))) || options.find(inside) || options[0];
-      labels.push(pick);
-      svg.append(s('text', { class: 'label', x: pick.tx, y: pick.ty, 'text-anchor': pick.anchor, onmousemove: tip(m), onmouseleave: hideTip }, text));
-    }
+    });
+    const free = (o, placed) => inside(o) && ![...boxes, ...placed, ...line].some((b) => hits(o, b));
+    // A step budget keeps a crowded chart from searching every combination.
+    let budget = 20000;
+    const place = (i, placed) => {
+      if (i === order.length) return placed;
+      for (const o of options[i]) {
+        if (--budget < 0) return null;
+        if (free(o, placed)) { const done = place(i + 1, [...placed, o]); if (done) return done; }
+      }
+      return null;
+    };
+    // No arrangement keeps every label clear: each takes its first free spot, if any.
+    const picks = place(0, []) || options.reduce((placed, opts) =>
+      [...placed, opts.find((o) => free(o, placed)) || opts.find(inside) || opts[0]], []);
+    order.forEach((m, i) => svg.append(s('text', { class: 'label', x: picks[i].tx, y: picks[i].ty,
+      'text-anchor': picks[i].anchor, onmousemove: tip(m), onmouseleave: hideTip }, m.label)));
 
     for (const m of pts) {
       const g = s('g', { class: 'pt', transform: `translate(${x(m.cost) - S / 2},${y(m.score) - S / 2})`, onmousemove: tip(m), onmouseleave: hideTip });
