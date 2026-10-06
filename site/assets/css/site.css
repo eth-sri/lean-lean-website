@@ -111,8 +111,6 @@ main { display: block; outline: none; }
 .hero-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 500; font-size: 0.95rem; text-decoration: none; }
 .hero-link img { display: block; flex: none; width: 16px; height: 16px; }
 a.hero-link:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-.hero-link.pending { color: var(--muted); cursor: default; }
-.hero-link.pending img { filter: grayscale(1); opacity: 0.5; }
 
 /* ── section heads ───────────────────────────────────────────────────── */
 .section { display: grid; gap: 20px; min-width: 0; }

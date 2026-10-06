@@ -10,6 +10,7 @@ SVG assets from [Lobe Icons](https://github.com/lobehub/lobe-icons), pinned to c
 - `meta.svg`: Simple Icons’ `meta.svg`, released under CC0 1.0
 - `huggingface.svg`: `packages/static-svg/icons/huggingface-color.svg` (hero link)
 - `arxiv.svg`, `github.svg`: Simple Icons 16.33.0, released under CC0 1.0, filled with their brand colours (hero links)
+- `paper.svg`: a plain document icon drawn for this site (hero paper link)
 - `palomar.svg`: the Palomar Registry's favicon (https://palomar-registry.org/favicon.svg), its dark-mode style and comments removed (link to a repository's registry entry)
 - `LICENSE`: `LICENSE`
 

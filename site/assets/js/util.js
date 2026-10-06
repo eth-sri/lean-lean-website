@@ -6,9 +6,9 @@ export const CONTACT_EMAIL = 'kari.roegnvaldsson@inf.ethz.ch';
 export const CODE_URL = 'https://github.com/eth-sri/lean-lean';
 export const DATASET_URL = 'https://huggingface.co/datasets/eth-sri/lean-lean';
 
-// Paper link and citation: empty until the paper is on arXiv, which hides the paper link
-// (the hero shows a pending arXiv link) and the BibTeX. Then set both, e.g.
-//   PAPER_URL = 'https://arxiv.org/abs/<id>'
+// The paper, served from site/paper.pdf (copied from the lean-lean repo's leanlean.pdf).
+export const PAPER_URL = 'paper.pdf';
+// BibTeX: empty until the paper is on arXiv, which hides the citation. Then set it, e.g.
 //   CITATION = `@article{leanlean2026,
 //     title   = {LeanLean: Benchmarking Repository-Scale Lean Proof Compression},
 //     author  = {R{\\"o}gnvaldsson, K{\\'a}ri and M{\\"u}ndler-Sasahara, Niels and Dekoninck, Jasper and Vechev, Martin},
@@ -16,7 +16,6 @@ export const DATASET_URL = 'https://huggingface.co/datasets/eth-sri/lean-lean';
 //     year    = {2026},
 //     url     = {https://arxiv.org/abs/<id>}
 //   }`
-export const PAPER_URL = '';
 export const CITATION = '';
 
 export function h(tag, attrs = {}, ...children) {

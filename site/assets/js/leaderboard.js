@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=b56d6e059b';
+import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=56511a6dd2';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -234,10 +234,7 @@ export function renderLeaderboard(view, bench) {
       h('a', { href: 'https://www.sri.inf.ethz.ch', target: '_blank', rel: 'noopener' }, h('img', { src: 'assets/sri-logo.svg', alt: 'SRI Lab', width: 136, height: 24 })),
       h('a', { href: 'https://ethz.ch', target: '_blank', rel: 'noopener' }, h('img', { src: 'assets/eth-logo.svg', alt: 'ETH Zurich', width: 144, height: 24 }))),
     h('div', { class: 'hero-links' },
-      PAPER_URL
-        ? heroLink(PAPER_URL, 'arxiv', 'Paper')
-        : h('span', { class: 'hero-link pending', title: 'The paper will be on arXiv soon' },
-          h('img', { src: 'assets/logos/arxiv.svg', alt: '', width: 16, height: 16 }), 'arXiv'),
+      heroLink(PAPER_URL, 'paper', 'Paper'),
       heroLink(CODE_URL, 'github', 'Code'),
       heroLink(DATASET_URL, 'huggingface', 'Benchmark')));
 
