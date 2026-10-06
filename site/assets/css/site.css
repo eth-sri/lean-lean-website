@@ -714,7 +714,7 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 }
 .results-tabs button:hover { color: var(--ink); }
 .results-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
-@media (min-width: 760px) { .results-tabs { display: none; } }
+@media (min-width: 760px) { .results-tabs, .tab-note { display: none; } }
 @media (max-width: 759.98px) {
   .result-panel h2,
   .results-body[data-tab="frontier"] .board-panel,
@@ -724,6 +724,9 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 .chart.frontier .pt rect { fill: var(--surface); stroke-width: 1.5; }
 .chart.frontier .pt { color: var(--ink); }
 .chart.frontier .label, .chart.frontier .axis-title { font-weight: 400; }
+.chart.frontier .large text { font-size: 13px; }
+.chart.frontier .large .axis-title { font-size: 14px; }
+.chart.frontier .large .label { font-size: 16px; }
 .chart.frontier .pt:hover rect { stroke-width: 2.5; }
 .chart.frontier .frontier-line { fill: none; stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 5 4; stroke-linejoin: round; opacity: 0.6; }
 

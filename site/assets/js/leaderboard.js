@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=e98656abd3';
+import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=c650db202f';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -110,6 +110,8 @@ function frontierChart(models) {
     const zoom = +host.dataset.zoom || 1;
     const W = Math.round(drawn / zoom);
     const narrow = W < 560;
+    // A wide chart (a desktop) sets its labels a size up; see .chart.frontier .large in site.css.
+    const large = W >= 760, fs = large ? 16 : 12;
     const H = +host.dataset.height || (narrow ? 300 : W < 900 ? 360 : 400);
     const L = narrow ? 36 : 44, R = W - (narrow ? 10 : 18), T = 30, B = H - 42;
     const S = +host.dataset.mark || (narrow ? 16 : 18), icon = Math.round(S * 0.58);
@@ -121,7 +123,7 @@ function frontierChart(models) {
     const top = 100, floor = -3;
     const y = (v) => B - ((v - floor) / (top - floor)) * (B - T);
 
-    const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img',
+    const svg = s('svg', { class: large ? 'large' : null, viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img',
       'aria-label': `Score against cost per repository. ${pts.map((m) => `${m.label}: ${pct(m.score)} at ${usd(m.cost)}`).join('; ')}.` });
     const grid = s('g', { class: 'grid' });
     for (let t = 0; t <= top; t += 10) {
@@ -143,11 +145,11 @@ function frontierChart(models) {
       s('text', { class: 'axis-title', x: R, y: H - 6, 'text-anchor': 'end' }, 'Cost per repository (USD, log scale)'),
       s('polyline', { class: 'frontier-line', points: frontier.map((m) => `${x(m.cost)},${y(m.score)}`).join(' ') }));
 
-    // Direct labels: beside each logo where there is room (right, left, above,
-    // below, then above or below flush with either edge), placed from the top
+    // Direct labels: beside each logo where there is room (right, left, below,
+    // above, then below or above flush with either edge), placed from the top
     // score down so leaders get first pick, backtracking when a later label
     // would find no free spot.
-    measure.font = `400 12px ${cssVar('--font-ui')}`;
+    measure.font = `400 ${fs}px ${cssVar('--font-ui')}`;
     const boxes = pts.map((m) => ({ x: x(m.cost) - S / 2 - 2, y: y(m.score) - S / 2 - 2, w: S + 4, h: S + 4 }));
     const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
     // The frontier line, as small squares every few pixels, so labels keep clear of it too.
@@ -160,14 +162,14 @@ function frontierChart(models) {
     const order = [...pts].sort((a, b) => b.score - a.score);
     const options = order.map((m) => {
       const cx = x(m.cost), cy = y(m.score), r = S / 2 + 6, e = S / 2;
-      const w = measure.measureText(m.label).width, lh = 14;
-      const above = { y: cy - r - lh + 2, ty: cy - r - 1 }, below = { y: cy + r - 2, ty: cy + r + 9 };
+      const w = measure.measureText(m.label).width, lh = fs + 2, mid = cy + fs / 3;
+      const above = { y: cy - r - lh + 2, ty: cy - r - 1 }, below = { y: cy + r - 2, ty: cy + r + fs - 3 };
       return [
-        { x: cx + r, y: cy - lh / 2, anchor: 'start', tx: cx + r, ty: cy + 4 },
-        { x: cx - r - w, y: cy - lh / 2, anchor: 'end', tx: cx - r, ty: cy + 4 },
-        { ...above, x: cx - w / 2, anchor: 'middle', tx: cx },
+        { x: cx + r, y: cy - lh / 2, anchor: 'start', tx: cx + r, ty: mid },
+        { x: cx - r - w, y: cy - lh / 2, anchor: 'end', tx: cx - r, ty: mid },
         { ...below, x: cx - w / 2, anchor: 'middle', tx: cx },
-        ...[above, below].flatMap((v) => [
+        { ...above, x: cx - w / 2, anchor: 'middle', tx: cx },
+        ...[below, above].flatMap((v) => [
           { ...v, x: cx - e, anchor: 'start', tx: cx - e },
           { ...v, x: cx + e - w, anchor: 'end', tx: cx + e },
         ]),
@@ -266,12 +268,14 @@ export function renderLeaderboard(view, bench) {
   // opening on the frontier, with the leaderboard's summary and per-repository
   // columns as separate tabs (see site.css).
   const board = boardTable(bench);
+  // How a score is counted: under the frontier, and on a phone, where the panels
+  // are tabs, under the leaderboard's two tabs as well.
+  const scoreNote = 'Score is mean Lean token compression across repositories. A failed build or Comparator check scores zero.';
   const panels = {
     board: h('div', { class: 'result-panel board-panel', id: 'results-board', role: 'tabpanel' },
-      h('h2', {}, 'Leaderboard'), board),
+      h('div', { class: 'panel-head' }, h('h2', {}, 'Leaderboard'), h('p', { class: 'tab-note' }, scoreNote)), board),
     frontier: h('div', { class: 'result-panel frontier-panel', id: 'results-frontier', role: 'tabpanel' },
-      h('div', { class: 'panel-head' }, h('h2', {}, 'Frontier'),
-        h('p', {}, 'Score is mean Lean token compression across repositories. A failed build or Comparator check scores zero.')),
+      h('div', { class: 'panel-head' }, h('h2', {}, 'Frontier'), h('p', {}, scoreNote)),
       frontierChart(models)),
   };
   const body = h('div', { class: 'results-body', 'data-tab': 'frontier' }, panels.frontier, panels.board);
