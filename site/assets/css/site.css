@@ -704,7 +704,9 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 @media (max-width: 759.98px) { .hero + .results { margin-top: -20px; } }
 /* The panel titles take the section-heading size (they only show from 760px). */
 .result-panel { display: grid; gap: 20px; min-width: 0; }
-.result-panel > h2 { font-size: 1.75rem; }
+.result-panel h2 { font-size: 1.75rem; }
+.panel-head { display: grid; gap: 6px; }
+.panel-head p { max-width: 64ch; color: var(--ink-2); }
 .results-tabs { display: flex; gap: clamp(14px, 5vw, 24px); border-bottom: 1px solid var(--rule); }
 .results-tabs button {
   border: 0; background: none; cursor: pointer; padding: 6px 0 8px; margin-bottom: -1px;
@@ -714,7 +716,7 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 .results-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 @media (min-width: 760px) { .results-tabs { display: none; } }
 @media (max-width: 759.98px) {
-  .result-panel > h2,
+  .result-panel h2,
   .results-body[data-tab="frontier"] .board-panel,
   .results-body:not([data-tab="frontier"]) .frontier-panel { display: none; }
 }

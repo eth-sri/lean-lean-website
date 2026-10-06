@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=56511a6dd2';
+import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=a50d33a09d';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -246,7 +246,9 @@ export function renderLeaderboard(view, bench) {
     board: h('div', { class: 'result-panel board-panel', id: 'results-board', role: 'tabpanel' },
       h('h2', {}, 'Leaderboard'), board),
     frontier: h('div', { class: 'result-panel frontier-panel', id: 'results-frontier', role: 'tabpanel' },
-      h('h2', {}, 'Frontier'), frontierChart(models)),
+      h('div', { class: 'panel-head' }, h('h2', {}, 'Frontier'),
+        h('p', {}, 'Score is mean Lean token compression across repositories. A failed build or Comparator check scores zero.')),
+      frontierChart(models)),
   };
   const body = h('div', { class: 'results-body', 'data-tab': 'frontier' }, panels.frontier, panels.board);
   const tabs = [['frontier', 'Frontier', panels.frontier], ['summary', 'Leaderboard', panels.board], ['repos', 'Per repository', panels.board]]
