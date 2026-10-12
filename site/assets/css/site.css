@@ -529,6 +529,7 @@ pre.code .ln.add.stepped { background: color-mix(in srgb, var(--ink) 3%, var(--s
 .split .sl > span.add.stepped { background: color-mix(in srgb, var(--ink) 3%, var(--surface)); }
 .diff-key { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 0.72rem; color: var(--muted); }
 .file-key { padding: 6px 12px; border-bottom: 1px solid var(--rule); }
+.file-views { padding: 8px 12px; border-bottom: 1px solid var(--rule); }
 .diff-key > span { display: inline-flex; align-items: center; gap: 4px; }
 .code .ln.del mark, .split .del mark { background: color-mix(in srgb, var(--g-deleted) 26%, transparent); }
 .code .ln.fold {

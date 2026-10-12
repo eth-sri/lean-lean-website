@@ -1,7 +1,7 @@
-import { h, load, loadChunk, logo, modelColor, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=f3f59b240e';
-import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=f3f59b240e';
-import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=f3f59b240e';
-import { TraceView } from './trace.js?v=f3f59b240e';
+import { h, load, loadChunk, logo, modelColor, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=2827766620';
+import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=2827766620';
+import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=2827766620';
+import { TraceView } from './trace.js?v=2827766620';
 
 const CATEGORY_TEXT = {
   unchanged: 'Unchanged', modified: 'Modified', comments: 'Comments or layout only', deleted: 'Deleted', dead: 'Dead code, removed', added: 'Added',
@@ -981,9 +981,21 @@ class RepoPage {
         h('span', { class: 'muted num', style: { fontSize: '0.75rem' } }, f.scored ? [`${int(f.before)} → ${int(f.after)} Lean tokens (${f.before ? signedPct(-(1 - f.after / f.before) * 100) : 'new'}) · `, tokenDiff(f.tdel, f.tadd, int)]
           : f.harness ? 'Written by the benchmark harness · not part of the score' : 'Not part of the score')),
       h('span', { class: `chip ${f.state === 'deleted' ? 'bad' : f.state === 'added' ? 'warn' : ''}` }, f.harness ? 'harness' : f.state), shareButton());
-    pane.replaceChildren(head, h('div', { class: 'note' }, 'Loading diff…'));
+    // A modified file reads as its diff, or whole as it was before or after; the choice carries over to the next file.
+    const fileView = f.state === 'modified' ? (this.fileView ||= 'diff') : 'diff';
+    const views = f.state === 'modified'
+      ? h('div', { class: 'file-views' }, seg([['diff', 'Diff'], ['before', 'Before'], ['after', 'After']], fileView,
+        (v) => { this.fileView = v; this.openFile(f, pane, ul); }, 'File view'))
+      : null;
+    pane.replaceChildren(head, ...(views ? [views] : []), h('div', { class: 'note' }, 'Loading diff…'));
     let result;
-    if (f.state === 'modified') {
+    if (f.state === 'modified' && fileView !== 'diff') {
+      const source = await this.sources();
+      const lines = ((await source[fileView](f.path)) || '').split('\n');
+      if (lines.length && lines[lines.length - 1] === '') lines.pop();
+      // A whole file is plain rows, cheap enough to show in full up to 20,000 lines.
+      result = { pre: codeBlock(lines.slice(0, 20000)), truncated: lines.length > 20000, total: lines.length, limit: 20000, plain: true };
+    } else if (f.state === 'modified') {
       this.diff = this.diff || await load(`data/repos/${this.id}/${this.model.short}.diff.json.gz`);
       result = hunksBlock(this.diff[f.path] || [], 4000, this.lineKinds(f.path), this.deadLines(f.path), this.stepSpans(f.path));
       stepTips(result.pre);
@@ -998,8 +1010,8 @@ class RepoPage {
     }
     if (this.filePath !== f.path) return;
     result.pre.classList.add('wrap');
-    const key = diffKey(result.pre);
-    pane.replaceChildren(head, ...(key ? [h('div', { class: 'file-key' }, key)] : []), result.pre, ...(result.truncated ? [h('div', { class: 'more muted' }, `Showing the first 4,000 of ${int(result.total)} lines.`)] : []));
+    const key = result.plain ? null : diffKey(result.pre);
+    pane.replaceChildren(head, ...(views ? [views] : []), ...(key ? [h('div', { class: 'file-key' }, key)] : []), result.pre, ...(result.truncated ? [h('div', { class: 'more muted' }, `Showing the first ${int(result.limit || 4000)} of ${int(result.total)} lines.`)] : []));
     pane.scrollTop = 0;
   }
 }
