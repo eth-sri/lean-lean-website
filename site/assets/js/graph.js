@@ -12,7 +12,7 @@
 // A node's area is its size in Lean tokens; its shape is its kind: theorems
 // are circles, definitions squares, anything else (notation, macros, axioms)
 // triangles.
-import { cssVar } from './util.js?v=6082c9e522';
+import { cssVar } from './util.js?v=f3f59b240e';
 
 export const STATUS = ['unchanged', 'rewritten', 'structural', 'deleted', 'dead', 'comments'];
 
@@ -472,7 +472,8 @@ export class GraphView {
       totals.set(current, (totals.get(current) || 0) + lane.count);
     }
     for (const lane of lanes) {
-      if (!lane.label) continue;
+      // Only the removed and added sections are named; protected results and dependency layers go unlabelled.
+      if (!lane.label || lane.status === 'protected' || lane.status === 'kept') continue;
       const ly = lane.y * k + y - 6;
       if (ly < 16 || ly > this.h - 4) continue;
       const text = `${lane.label} · ${totals.get(lane)}`;

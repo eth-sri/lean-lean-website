@@ -1,7 +1,7 @@
-import { h, load, loadChunk, logo, modelColor, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN } from './util.js?v=6082c9e522';
-import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=6082c9e522';
-import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=6082c9e522';
-import { TraceView } from './trace.js?v=6082c9e522';
+import { h, load, loadChunk, logo, modelColor, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=f3f59b240e';
+import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=f3f59b240e';
+import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=f3f59b240e';
+import { TraceView } from './trace.js?v=f3f59b240e';
 
 const CATEGORY_TEXT = {
   unchanged: 'Unchanged', modified: 'Modified', comments: 'Comments or layout only', deleted: 'Deleted', dead: 'Dead code, removed', added: 'Added',
@@ -163,13 +163,14 @@ class RepoPage {
       h('div', { style: { display: 'grid', gap: '4px', minWidth: 0 } },
         h('span', { class: 'eyebrow' }, 'Repository'),
         h('div', { class: 'repo-title' }, h('h2', {}, r.name),
-          iconLink(`${r.url}/tree/${r.commit}`, 'github', `${r.name} on GitHub, at the benchmarked commit`),
-          iconLink(`https://palomar-registry.org/entry?id=${encodeURIComponent(r.id.replace(/^palomar__/, 'PALOMAR-'))}`, 'palomar', 'Its entry in the Palomar Registry')),
+          r.url ? iconLink(`${r.url}/tree/${r.commit}`, 'github', `${r.name} on GitHub, at the benchmarked commit`) : null,
+          r.id.startsWith('palomar__') ? iconLink(`https://palomar-registry.org/entry?id=${encodeURIComponent(r.id.replace(/^palomar__/, 'PALOMAR-'))}`, 'palomar', 'Its entry in the Palomar Registry') : null),
         h('div', { class: 'meta' },
           h('span', {}, `${r.scale} · ${tokens(r.tokens)} Lean tokens`), h('span', {}, `${int(r.core)} protected result${r.core === 1 ? '' : 's'}`),
-          h('span', {}, `${r.family} (${r.arxiv})`), h('code', {}, r.toolchain.replace('leanprover/lean4:', 'Lean ')),
+          r.family ? h('span', {}, `${r.family} (${r.arxiv})`) : null, h('code', {}, r.toolchain.replace('leanprover/lean4:', 'Lean ')),
           h('code', {}, r.commit.slice(0, 10)))),
-      h('div', { class: 'repo-head-tools' }, this.picker.node,
+      // A page of one repository (bench.solo) has nothing to switch to or close back to.
+      bench.solo ? null : h('div', { class: 'repo-head-tools' }, this.picker.node,
         h('a', { href: '#/', class: 'round-close', 'aria-label': 'Close the repository viewer', title: 'Close', html: CLOSE_ICON })));
 
     const prepSaved = r.raw_tokens ? (1 - r.tokens / r.raw_tokens) * 100 : 0;
@@ -594,7 +595,8 @@ class RepoPage {
     this.outcome.replaceChildren(
       h('div', { class: 'stats' },
         stat('Before', `${tokens(this.repo.tokens)} tokens`), stat('After', `${tokens(res.post)} tokens`),
-        stat('Score', pct(res.score), modelColor(m)), stat('Cost', usd(res.cost)), stat('Duration', hours(res.seconds / 3600))),
+        stat('Score', pct(res.score), modelColor(m)), heartbeatStat(this.repo.heartbeats, res),
+        stat('Cost', usd(res.cost)), stat('Duration', hours(res.seconds / 3600))),
       res.origin ? originStrip(res.origin, this.repo.tokens, m.label) : null);
   }
 
@@ -1002,6 +1004,19 @@ class RepoPage {
   }
 }
 
+// Heartbeats Lean spends elaborating the repository's own declarations, before → after (Lean's
+// user unit, the one maxHeartbeats counts; imports excluded), with the change. Not every passing
+// submission is measured yet.
+function heartbeatStat(before, res) {
+  if (before == null) return null;
+  const after = res.heartbeats_after;
+  const title = after == null ? `${int(before)} heartbeats before; the submission is not measured yet`
+    : `${int(before)} → ${int(after)} heartbeats to elaborate the repository's own declarations (imports excluded)`;
+  return h('div', { class: 'stat', title }, h('span', {}, 'Heartbeats'),
+    h('b', {}, `${tokens(before)} → ${after == null ? '—' : tokens(after)}`,
+      after == null ? null : h('small', {}, signedPct(-res.heartbeats, 1))));
+}
+
 function row(label, value) { return h('div', { class: 'row' }, h('span', {}, label), h('span', {}, value)); }
 function sw(color, label) { return h('span', {}, h('i', { class: 'swatch', style: { background: cssVar(color) } }), label); }
 
@@ -1093,7 +1108,7 @@ function breakable(text) {
 // An outside page for the repository, as an icon that opens in a new tab.
 function iconLink(href, icon, label) {
   return h('a', { class: 'icon-link', href, target: '_blank', rel: 'noopener', title: label, 'aria-label': label },
-    h('img', { src: `assets/logos/${icon}.svg`, alt: '', width: 18, height: 18 }));
+    h('img', { src: `${ASSETS}logos/${icon}.svg`, alt: '', width: 18, height: 18 }));
 }
 
 // Share the address of what is open: the share sheet on touch screens, else copy it.
@@ -1176,10 +1191,11 @@ function stepTips(node) {
   return node;
 }
 
-// The selected agent's compression origin as one horizontal bar on a fixed
-// scale from 0 to 100% of the baseline. Savings stack right from zero; costs
-// (added declarations, proofs that grew) take back the end of that stack as
-// hatched segments, so the solid part stops at the net compression. A net
+// The selected agent's compression origin on a fixed scale from 0 to 100% of
+// the baseline, in two lanes. Savings stack right from zero in the upper lane;
+// costs (added declarations, proofs that grew) stack back from the end of the
+// savings as hatched segments in a thinner lane beneath, so every saving stays
+// visible and a tick through both lanes marks the net compression. A net
 // increase in size extends the scale left of zero.
 function originStrip(origin, baseline, label) {
   const pts = (v) => (v / baseline) * 100;
@@ -1204,7 +1220,8 @@ function originStrip(origin, baseline, label) {
     const v = parts[o.key];
     const color = cssVar(o.color);
     return h('i', {
-      style: { left: `${at(from)}%`, width: `${at(to) - at(from)}%`,
+      class: v < 0 ? 'cost' : null,
+      style: { left: `${Math.min(at(from), at(to))}%`, width: `${Math.abs(at(to) - at(from))}%`,
         background: v < 0 ? `repeating-linear-gradient(135deg, ${color} 0 3px, var(--surface) 3px 4.5px)` : color },
       onmousemove: (e) => showTip(e, `<b>${esc(label)}</b><div class="row"><span><i class="swatch" style="background:${color}"></i>${o.label}</span><span>${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(1)} pts</span></div>`),
       onmouseleave: hideTip });
@@ -1214,7 +1231,8 @@ function originStrip(origin, baseline, label) {
   return h('div', { class: 'origin-strip' },
     h('span', { class: 'eyebrow' }, 'Compression origin'),
     h('div', { class: 'origin-bar', role: 'img', 'aria-label': `${ORIGIN.map((o) => `${o.label} ${parts[o.key].toFixed(1)} points`).join(', ')}, net ${net.toFixed(1)}% of the baseline` },
-      ...placed.map(segment), lo < 0 ? h('b', { class: 'zero', style: { left: `${at(0)}%` } }) : null),
+      ...placed.map(segment), lo < 0 ? h('b', { class: 'zero', style: { left: `${at(0)}%` } }) : null,
+      negative.length ? h('b', { class: 'net', style: { left: `${at(net)}%` } }) : null),
     h('div', { class: 'origin-axis', 'aria-hidden': 'true' },
       lo < 0 && at(0) > 15 ? h('span', { class: 'start' }, `−${(-lo).toFixed(1)}%`) : null,
       h('span', { class: at(0) < 3 ? 'start' : 'zero', style: { left: `${at(0)}%` } }, '0%'),

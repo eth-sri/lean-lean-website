@@ -942,12 +942,17 @@ pre.bibtex {
 .outcome-strip .stat { display: grid; gap: 1px; }
 .outcome-strip .stat span { font-size: 0.66rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
 .outcome-strip .stat b { font: 500 1.05rem/1.15 var(--font-display); font-variant-numeric: tabular-nums; }
+.outcome-strip .stat b small { margin-left: 6px; font-size: 0.78em; color: var(--muted); }
 .origin-strip { flex: 1; min-width: min(100%, 22rem); display: grid; gap: 5px; }
 .origin-strip .eyebrow { font-size: 0.66rem; }
-.origin-bar { position: relative; height: 12px; border-radius: 3px; overflow: hidden; background: var(--sunk); }
-.origin-bar i { position: absolute; top: 0; height: 100%; min-width: 1px; }
+/* Savings in a 12px lane on a sunk track; costs hatched in a 6px lane beneath. */
+.origin-bar { position: relative; height: 20px; background: linear-gradient(var(--sunk), var(--sunk)) 0 0 / 100% 12px no-repeat; border-radius: 3px 3px 0 0; }
+.origin-bar i { position: absolute; top: 0; height: 12px; min-width: 1px; }
+.origin-bar i:first-child { border-top-left-radius: 3px; }
 .origin-bar i + i { box-shadow: inset 1px 0 0 var(--surface); }
-.origin-bar .zero { position: absolute; top: 0; height: 100%; width: 2px; margin-left: -1px; background: var(--ink); }
+.origin-bar i.cost { top: 14px; height: 6px; border-radius: 1px; box-shadow: none; }
+.origin-bar .zero, .origin-bar .net { position: absolute; top: 0; height: 100%; width: 2px; margin-left: -1px; background: var(--ink); }
+.origin-bar .net { top: -2px; height: calc(100% + 4px); border-radius: 1px; }
 .origin-axis { position: relative; height: 0.9rem; margin-top: -2px; font-size: 0.64rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .origin-axis span { position: absolute; top: 0; white-space: nowrap; }
 .origin-axis .zero { transform: translateX(-50%); color: var(--ink-2); font-weight: 600; }

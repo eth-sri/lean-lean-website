@@ -22,7 +22,8 @@ def main() -> None:
     for path in files:
         digest.update(REF.sub(r"\1", path.read_text(encoding="utf-8")).encode())
     version = digest.hexdigest()[:10]
-    for path in [SITE / "index.html", *files]:
+    pages = [SITE / "index.html", *sorted(SITE.glob("*/index.html"))]
+    for path in [*pages, *files]:
         text = path.read_text(encoding="utf-8")
         stamped = REF.sub(lambda m: f"{m.group(1)}?v={version}", text)
         if stamped != text:

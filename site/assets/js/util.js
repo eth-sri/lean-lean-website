@@ -18,6 +18,10 @@ export const PAPER_URL = 'paper.pdf';
 //   }`
 export const CITATION = '';
 
+// Where the site's assets are, relative to the page: a page in a subfolder sets
+// <html data-assets="../assets/">.
+export const ASSETS = document.documentElement.dataset.assets || 'assets/';
+
 export function h(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(attrs || {})) {
@@ -143,7 +147,7 @@ export async function preloadLogos(names) {
   await Promise.all([...new Set(names)].map(async (name) => {
     if (logoText.has(name)) return;
     try {
-      const text = await (await fetch(`assets/logos/${name}.svg`)).text();
+      const text = await (await fetch(`${ASSETS}logos/${name}.svg`)).text();
       logoText.set(name, text.replace(/<title>.*?<\/title>/, '').replace(/\s(width|height|style)="[^"]*"/g, '')
         .replace('fill="#0467DF"', 'fill="#0467DF"'));
     } catch { logoText.set(name, ''); }
