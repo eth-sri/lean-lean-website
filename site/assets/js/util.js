@@ -8,13 +8,13 @@ export const DATASET_URL = 'https://huggingface.co/datasets/eth-sri/lean-lean';
 
 // The paper, served from site/paper.pdf (copied from the lean-lean repo's leanlean.pdf).
 export const PAPER_URL = 'paper.pdf';
-// Cite the GitHub-hosted preprint until an archival publication URL is available.
+// Cite the preprint hosted alongside the benchmark.
 export const CITATION = `@misc{leanlean2026,
   title  = {{LeanLean}: Benchmarking Repository-Scale {Lean} Proof Compression},
   author = {R{\\"o}gnvaldsson, K{\\'a}ri and M{\\"u}ndler-Sasahara, Niels and Dekoninck, Jasper and Vechev, Martin},
   year   = {2026},
   note   = {Preprint},
-  url    = {https://github.com/eth-sri/lean-lean/blob/main/leanlean.pdf}
+  url    = {https://leanleanbench.com/paper.pdf}
 }`;
 
 // Where the site's assets are, relative to the page: a page in a subfolder sets
