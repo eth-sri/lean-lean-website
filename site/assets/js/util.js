@@ -8,15 +8,14 @@ export const DATASET_URL = 'https://huggingface.co/datasets/eth-sri/lean-lean';
 
 // The paper, served from site/paper.pdf (copied from the lean-lean repo's leanlean.pdf).
 export const PAPER_URL = 'paper.pdf';
-// BibTeX: empty until the paper is on arXiv, which hides the citation. Then set it, e.g.
-//   CITATION = `@article{leanlean2026,
-//     title   = {LeanLean: Benchmarking Repository-Scale Lean Proof Compression},
-//     author  = {R{\\"o}gnvaldsson, K{\\'a}ri and M{\\"u}ndler-Sasahara, Niels and Dekoninck, Jasper and Vechev, Martin},
-//     journal = {arXiv preprint arXiv:<id>},
-//     year    = {2026},
-//     url     = {https://arxiv.org/abs/<id>}
-//   }`
-export const CITATION = '';
+// Cite the GitHub-hosted preprint until an archival publication URL is available.
+export const CITATION = `@misc{leanlean2026,
+  title  = {{LeanLean}: Benchmarking Repository-Scale {Lean} Proof Compression},
+  author = {R{\\"o}gnvaldsson, K{\\'a}ri and M{\\"u}ndler-Sasahara, Niels and Dekoninck, Jasper and Vechev, Martin},
+  year   = {2026},
+  note   = {Preprint},
+  url    = {https://github.com/eth-sri/lean-lean/blob/main/leanlean.pdf}
+}`;
 
 // Where the site's assets are, relative to the page: a page in a subfolder sets
 // <html data-assets="../assets/">.

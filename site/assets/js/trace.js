@@ -3,8 +3,8 @@
 // into the same steps: say, think, user, compact and tool. Tool calls keep their
 // native names; their category picks how the input is drawn, and the paper's action
 // class (Build, Verify, Measure, Read, Search, Edit, Git, Lake, Sleep, Other) says what they did.
-import { h, s, load, loadChunk, loadPack, int, tokens, usd, signedInt, esc, showTip, hideTip } from './util.js?v=2827766620';
-import { codeBlock, patchBlock } from './code.js?v=2827766620';
+import { h, s, load, loadChunk, loadPack, int, tokens, usd, signedInt, esc, showTip, hideTip } from './util.js?v=0064c90be0';
+import { codeBlock, patchBlock } from './code.js?v=0064c90be0';
 
 // The paper's action classes (scripts/analysis/plot_action_classes.py), as in its action figure.
 const ACTIONS = ['Build', 'Verify', 'Measure', 'Read', 'Search', 'Edit', 'Git', 'Lake', 'Sleep', 'Other'];

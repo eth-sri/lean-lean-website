@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=2827766620';
+import { h, s, logo, logoMarkup, modelColor, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=0064c90be0';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -298,14 +298,14 @@ export function renderMethod(bench) {
   return h('div', { class: 'page method-page' }, methodSection(bench));
 }
 
-// The page's closing section, below the repository viewer: the BibTeX once there is one.
+// The page's closing section, below the repository viewer: citation and contact.
 export function renderCitation() {
   return h('div', { class: 'page cite-page' }, h('section', { class: 'section cite' },
-    sectionHead(null, CITATION ? 'Citation information' : 'Contact', null), CITATION ? citationBlock() : null,
+    sectionHead(null, CITATION ? 'Citation' : 'Contact', null), CITATION ? citationBlock() : null,
     h('p', { class: 'contact' }, 'Questions? Email ', h('a', { href: `mailto:${CONTACT_EMAIL}` }, CONTACT_EMAIL), '.')));
 }
 
-// CITATION is set in util.js once the paper is on arXiv.
+// CITATION is defined with the paper metadata in util.js.
 function citationBlock() {
   const pre = h('pre', { class: 'bibtex' }, h('code', {}, CITATION));
   const status = h('span', { class: 'muted', 'aria-live': 'polite' });
