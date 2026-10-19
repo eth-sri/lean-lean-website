@@ -20,3 +20,6 @@ hidden/
 # Public-data anonymization, including trace pack indexes.
 !/pipeline/anonymize_paths.py
 !/pipeline/test_anonymize_paths.py
+
+# Social preview generated during each Pages deployment.
+!/pipeline/build_og.py

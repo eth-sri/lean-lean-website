@@ -28,6 +28,18 @@ python3 pipeline/stamp_assets.py
 This also updates the paper metadata used by the benchmark. The full build runs
 both steps, and CI checks that the generated files are current.
 
+## Social preview
+
+Every Pages deployment regenerates `site/assets/og.png` from the current frontier
+chart, including the published reasoning variants. It also updates the image alt
+text and versions the image URL so new previews can fetch the latest card.
+To regenerate locally:
+
+```bash
+uv run --with playwright==1.63.0 playwright install firefox
+uv run --with playwright==1.63.0 python pipeline/build_og.py
+```
+
 ## Public data
 
 Before publishing refreshed data, run `python3 pipeline/anonymize_paths.py` to

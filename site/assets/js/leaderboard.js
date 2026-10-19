@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=452a427dad';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=7d28928b13';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -177,8 +177,8 @@ function frontierChart(models) {
       const cx = x(m.cost), cy = y(m.score), r = S / 2 + 6, e = S / 2;
       const w = measure.measureText(modelLabel(m)).width + 4, lh = fs * 1.5, mid = cy + fs / 3;
       const above = { y: cy - r - lh + 2, ty: cy - r - 1 }, below = { y: cy + r - 2, ty: cy + r + fs - 3 };
-      // Use the same mark-edge alignment as the other above/below labels.
-      const fixed = m.key === 'gpt-6.1-sol-max'
+      // Keep the Sol ablation labels above and flush with their mark's right edge.
+      const fixed = ['gpt-6.1-sol-medium', 'gpt-6.1-sol-high', 'gpt-6.1-sol', 'gpt-6.1-sol-max'].includes(m.key)
         ? { x: cx + e - w, anchor: 'end', tx: cx + e, ty: above.ty }
         : m.key === 'opus-5.5-medium' || m.key === 'opus-5.5-low'
           ? { x: cx - e, anchor: 'start', tx: cx - e, ty: below.ty } : null;

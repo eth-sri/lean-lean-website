@@ -22,8 +22,17 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # site/ is served as committed, data included: there is no build step.
+      # Data is already exported; render the social preview from the current chart.
       - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install social preview renderer
+        run: |
+          python -m pip install playwright==1.63.0
+          python -m playwright install --with-deps firefox
+      - name: Regenerate social preview and image metadata
+        run: python pipeline/build_og.py
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
