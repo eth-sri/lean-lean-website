@@ -12,3 +12,11 @@ hidden/
 /uv.lock
 /pipeline/*
 !/pipeline/stamp_assets.py
+
+# Static paper page source and generator used by CI.
+!/pipeline/build_paper.py
+!/pipeline/paper.json
+
+# Public-data anonymization, including trace pack indexes.
+!/pipeline/anonymize_paths.py
+!/pipeline/test_anonymize_paths.py

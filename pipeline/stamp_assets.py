@@ -19,10 +19,12 @@ def main() -> None:
     files = sorted((SITE / "assets/js").glob("*.js")) + sorted((SITE / "assets/css").glob("*.css"))
     # Hash the code with its version stamps removed, so stamping is idempotent.
     digest = hashlib.sha256()
-    for path in files:
+    # Inline previews use the module version when loading their SVG artwork.
+    artwork = sorted((SITE / "assets").glob("explore-*.svg"))
+    for path in [*files, *artwork]:
         digest.update(REF.sub(r"\1", path.read_text(encoding="utf-8")).encode())
     version = digest.hexdigest()[:10]
-    pages = [SITE / "index.html", *sorted(SITE.glob("*/index.html"))]
+    pages = [*sorted(SITE.glob("*.html")), *sorted(SITE.glob("*/index.html"))]
     for path in [*pages, *files]:
         text = path.read_text(encoding="utf-8")
         stamped = REF.sub(lambda m: f"{m.group(1)}?v={version}", text)

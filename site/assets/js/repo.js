@@ -1,7 +1,7 @@
-import { h, load, loadChunk, logo, modelColor, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=bfbc7385b9';
-import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=bfbc7385b9';
-import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=bfbc7385b9';
-import { TraceView } from './trace.js?v=bfbc7385b9';
+import { h, load, loadChunk, logo, modelColor, modelLabel, highestReasoningModels, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=452a427dad';
+import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=452a427dad';
+import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=452a427dad';
+import { TraceView } from './trace.js?v=452a427dad';
 
 const CATEGORY_TEXT = {
   unchanged: 'Unchanged', modified: 'Modified', comments: 'Comments or layout only', deleted: 'Deleted', dead: 'Dead code, removed', added: 'Added',
@@ -24,7 +24,8 @@ const SHAPE_TEXT = [['', 'Theorem'], ['sq', 'Definition'], ['tri', 'Notation, ma
 const CLOSE_ICON = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const CHEVRON_ICON = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-let current = null; // live page state for in-place updates
+let current = null;
+let repoHighestOnly = true; // live page state for in-place updates
 
 // The repository picker: a button that opens a filterable list, grouped by scale.
 // go(id) is called with the chosen repository; close() hides the list.
@@ -112,6 +113,64 @@ function repoPicker(bench, repo, go) {
   return { node, close };
 }
 
+// A compact model menu shares the desktop pills' content and availability.
+function modelPicker(tabs, choose) {
+  const content = h('span', { class: 'model-pick-value' });
+  const button = h('button', { type: 'button', class: 'pick-btn model-pick-btn',
+    'aria-haspopup': 'listbox', 'aria-expanded': 'false', 'aria-controls': 'model-options' },
+    content, h('span', { class: 'pick-chev', html: CHEVRON_ICON }));
+  const list = h('div', { id: 'model-options', role: 'listbox', 'aria-label': 'Models', class: 'model-options' });
+  const menu = h('div', { class: 'pick-menu model-pick-menu', hidden: true },
+    h('div', { class: 'model-menu-head' }, h('span', {}, 'Choose a model'), h('span', {}, 'Score')), list);
+  const node = h('div', { class: 'pick model-picker' }, button, menu);
+  let selected = null;
+  const close = (refocus = false) => {
+    menu.hidden = true; node.classList.remove('open'); button.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('pointerdown', outside, true);
+    if (refocus) button.focus();
+  };
+  const outside = (event) => { if (!node.contains(event.target)) close(); };
+  const available = () => [...list.children].filter((option) => !option.disabled);
+  const open = () => {
+    menu.hidden = false; node.classList.add('open'); button.setAttribute('aria-expanded', 'true');
+    document.addEventListener('pointerdown', outside, true);
+    const option = available().find((option) => option.dataset.short === selected) || available()[0];
+    option?.focus({ preventScroll: true });
+    if (option) list.scrollTop = option.offsetTop - list.offsetTop - list.clientHeight / 2;
+  };
+  const copy = (pill) => [...pill.children].map((child) => child.cloneNode(true));
+  const refresh = (short) => {
+    selected = short;
+    const pills = [...tabs.querySelectorAll('button')].filter((pill) => !pill.hidden);
+    const active = pills.find((pill) => pill.dataset.short === short);
+    button.style.setProperty('--model', active?.style.getPropertyValue('--model') || 'var(--ink-2)');
+    button.setAttribute('aria-label', `Model: ${active?.querySelector('.t b').textContent || 'Choose a model'}`);
+    content.replaceChildren(...(active ? copy(active) : ['Choose a model']));
+    list.replaceChildren(...pills.map((pill) => h('button', {
+      type: 'button', role: 'option', tabindex: '-1', class: 'model-option',
+      'data-short': pill.dataset.short, 'aria-selected': String(pill === active),
+      disabled: pill.disabled, title: pill.title, style: { '--model': pill.style.getPropertyValue('--model') || 'var(--ink-2)' },
+      onclick: () => { close(true); if (pill.dataset.short !== selected) choose(pill.dataset.short); },
+    }, ...copy(pill), h('span', { class: 'model-check', 'aria-hidden': 'true' }, pill === active ? '✓' : ''))));
+  };
+  button.addEventListener('click', () => menu.hidden ? open() : close());
+  node.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !menu.hidden) { event.preventDefault(); event.stopPropagation(); close(true); }
+    else if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+      event.preventDefault();
+      if (menu.hidden) { open(); return; }
+      const options = available();
+      const index = options.indexOf(document.activeElement);
+      const next = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1
+        : (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+      options[next]?.focus({ preventScroll: true });
+      options[next]?.scrollIntoView({ block: 'nearest' });
+    } else if (event.key === 'Tab') close();
+  });
+  node.addEventListener('focusout', (event) => { if (!node.contains(event.relatedTarget)) close(); });
+  return { node, refresh, close };
+}
+
 // Agents with before/after graphs and diffs: verified submissions whose graphs were extracted.
 const explorable = (bench, results, m) => bench.models.includes(m) && results[m.key]?.status === 'passed' && Boolean(results[m.key].explorer);
 
@@ -124,6 +183,9 @@ export async function renderRepository(view, bench, id, shortArg, kind, inPlace,
   const results = bench.results[id] || {};
   const traces = await load('data/traces/index.json').catch(() => ({}));
   const agents = [...bench.models, ...(bench.extra_models || [])];
+  // A linked run without dependency graphs opens its own trace.
+  const requested = agents.find((m) => m.short === shortArg);
+  if (kind !== 'trace' && requested && !explorable(bench, results, requested) && traces[id]?.[requested.short]) kind = 'trace';
   // Graph and Diff need a verified submission; Trace any run, failed ones too.
   const available = kind === 'trace' ? agents.filter((m) => traces[id]?.[m.short]) : agents.filter((m) => explorable(bench, results, m));
   const byShort = Object.fromEntries(agents.map((m) => [m.short, m]));
@@ -141,6 +203,8 @@ export async function renderRepository(view, bench, id, shortArg, kind, inPlace,
   load(`data/repos/${id}/source.json.gz`).catch(() => {});  // the source index (≈1–11 kB), so the first declaration opens fast
   current = new RepoPage(view, bench, repo, graph, kind, traces[id] || {});
   current.home = home;
+  // Direct links open their requested view immediately on narrow screens.
+  current.pendingFull = kind;
   await current.update(model, kind, target);
   const page = current;
   return () => { page.destroy(); if (current === page) current = null; };
@@ -169,9 +233,8 @@ class RepoPage {
           h('span', {}, `${r.scale} · ${tokens(r.tokens)} Lean tokens`), h('span', {}, `${int(r.core)} protected result${r.core === 1 ? '' : 's'}`),
           r.family ? h('span', {}, `${r.family} (${r.arxiv})`) : null, h('code', {}, r.toolchain.replace('leanprover/lean4:', 'Lean ')),
           h('code', {}, r.commit.slice(0, 10)))),
-      // A page of one repository (bench.solo) has nothing to switch to or close back to.
-      bench.solo ? null : h('div', { class: 'repo-head-tools' }, this.picker.node,
-        h('a', { href: '#/', class: 'round-close', 'aria-label': 'Close the repository viewer', title: 'Close', html: CLOSE_ICON })));
+      // The explorer page provides its own navigation back to the leaderboard.
+      bench.solo ? null : h('div', { class: 'repo-head-tools' }, this.picker.node));
 
     const prepSaved = r.raw_tokens ? (1 - r.tokens / r.raw_tokens) * 100 : 0;
     const prepTab = h('button', {
@@ -185,14 +248,30 @@ class RepoPage {
       return h('button', {
         type: 'button', class: 'model-tab', 'data-short': m.short, style: { '--model': modelColor(m) }, 'aria-pressed': 'false',
         onclick: () => { location.hash = `#/${this.kind}/${this.id}/${m.short}`; },
-      }, logo(m, 'xs'), h('span', { class: 't' }, h('b', {}, m.label),
+      }, logo(m, 'xs'), h('span', { class: 't' }, h('b', {}, modelLabel(m)),
         res?.status === 'passed' ? h('span', {}, pct(res.score)) : res?.status === 'pending' ? h('span', { class: 'muted' }, 'not finished')
           : h('span', { class: 'fail' }, res ? 'failed' : 'no run')));
     };
     // Models run only on the Mini subset follow the main models, where they ran.
     const extras = (bench.extra_models || []).filter((m) => this.results[m.key]);
+    this.agents = [...byScore, ...extras];
+    this.highestModels = new Set(highestReasoningModels(this.agents));
+    this.highestOnly = h('input', { type: 'checkbox', role: 'switch', checked: repoHighestOnly, onchange: () => {
+      repoHighestOnly = this.highestOnly.checked;
+      this.refreshTabs();
+      if (!repoHighestOnly || !this.model || this.model === PREP || this.highestModels.has(this.model)) return;
+      const available = this.agents.filter((m) => this.highestModels.has(m) &&
+        (this.kind === 'trace' ? this.traces[m.short] : explorable(this.bench, this.results, m)));
+      const next = available.find((m) => m.label === this.model.label && m.provider === this.model.provider) || available[0];
+      location.hash = `#/${this.kind}/${this.id}/${next?.short || PREP.short}`;
+    } });
+    const filter = h('label', { class: 'results-filter' }, this.highestOnly, h('span', {}, 'Show only highest reasoning levels'));
     this.tabs = h('div', { class: 'model-tabs', role: 'group', 'aria-label': 'Agent' }, prepTab, h('i', { class: 'tab-sep', 'aria-hidden': 'true' }),
       byScore.map(tab), extras.length ? [h('i', { class: 'tab-sep', 'aria-hidden': 'true' }), extras.map(tab)] : null);
+
+    this.modelPicker = modelPicker(this.tabs, (short) => {
+      location.hash = `#/${this.kind}/${this.id}/${short}`;
+    });
 
     // Outcome of the selected agent: one strip of numbers and its compression origin.
     this.outcome = h('div', { class: 'outcome-strip' });
@@ -225,7 +304,7 @@ class RepoPage {
       launchButton('graph', 'Graph', this.graphLaunchSub), launchButton('repo', 'Diff', this.diffLaunchSub), launchButton('trace', 'Trace', this.traceLaunchSub));
 
     const inner = h('div', { style: { maxWidth: '96rem', margin: '0 auto', width: '100%', display: 'grid', gap: '14px' } },
-      head, this.tabs, this.outcome, this.viewTabs, this.launch, this.diffHost, this.graphHost, this.traceHost);
+      head, filter, this.tabs, this.modelPicker.node, this.outcome, this.viewTabs, this.launch, this.diffHost, this.graphHost, this.traceHost);
     this.root = h('div', { class: 'page wide' }, inner);
     view.replaceChildren(this.root);
 
@@ -255,7 +334,7 @@ class RepoPage {
   renderTitles() {
     const res = this.model && !this.isPrep ? this.results[this.model.key] : null;
     const title = () => [h('b', {}, this.repo.name),
-      h('span', {}, this.isPrep ? 'Preprocessing' : this.model ? `${this.model.label}${res ? ` · ${pct(res.score)}` : ''}` : 'Baseline')];
+      h('span', {}, this.isPrep ? 'Preprocessing' : this.model ? `${modelLabel(this.model)}${res ? ` · ${pct(res.score)}` : ''}` : 'Baseline')];
     this.diffTitle.replaceChildren(...title());
     this.graphTitle?.replaceChildren(...title());
     this.traceTitle.replaceChildren(...title());
@@ -283,17 +362,19 @@ class RepoPage {
         continue;
       }
       const m = agents.find((x) => x.short === b.dataset.short);
+      b.hidden = this.highestOnly.checked && !this.highestModels.has(m);
       const res = this.results[m.key];
       if (this.kind === 'trace') {
         const run = this.traces[m.short];
         b.disabled = !run;
-        b.title = run ? `${m.label}: ${int(run.steps)} steps, ${int(run.tools)} tool calls` : 'No trace was recorded for this run';
+        b.title = run ? `${modelLabel(m)}: ${int(run.steps)} steps, ${int(run.tools)} tool calls` : 'No trace was recorded for this run';
       } else {
         b.disabled = !explorable(this.bench, this.results, m);
         b.title = !res ? 'No run' : res.status === 'pending' ? 'This run is not finished yet' : res.status !== 'passed' ? 'Submission failed verification; scored 0. Its trace is under Trace.'
-          : b.disabled ? 'Dependency graphs were not extracted for this agent. Its trace is under Trace.' : `Show ${m.label}`;
+          : b.disabled ? 'Dependency graphs were not extracted for this agent. Its trace is under Trace.' : `Show ${modelLabel(m)}`;
       }
     }
+    this.modelPicker.refresh(this.model?.short);
   }
 
   setDrawer(open) {
@@ -386,7 +467,10 @@ class RepoPage {
     // The canvas had no size while hidden: measure it now, before a selection pans to a node.
     this.gv.resize();
     // Fit between the key at the top and the controls and peeking sheet at the bottom.
-    this.gv.pad = { top: 92, bottom: 172 };
+    const overlayBottom = this.graphHost.querySelector('.canvas-overlay').getBoundingClientRect().bottom;
+    const canvasTop = this.gv.wrap.getBoundingClientRect().top;
+    this.gv.pad = { top: Math.max(92, overlayBottom - canvasTop + 12), bottom: 172 };
+    this.gv.fitToNodes = true;
     this.gv.fit(); this.gv.fitted = true;
     this.listExpanded = false;
     this.renderInspector();
@@ -403,6 +487,7 @@ class RepoPage {
     if (was === 'graph') {
       this.graphHost.classList.remove('full');
       this.gv.pad = { top: 52, bottom: 32 };
+      this.gv.fitToNodes = false;
       hideTip();
       this.listExpanded = false;
       if (this.selected >= 0) this.gv.select(-1); else this.renderInspector();
@@ -464,7 +549,7 @@ class RepoPage {
   }
 
   destroy() {
-    this.gv?.destroy(); this.tv?.destroy(); this.dialog?.remove(); this.picker.close(); hideTip();
+    this.gv?.destroy(); this.tv?.destroy(); this.dialog?.remove(); this.picker.close(); this.modelPicker.close(); hideTip();
     document.documentElement.classList.remove('full-open');
     document.removeEventListener('keydown', this.onKey);
     window.removeEventListener('popstate', this.onPop);
@@ -502,7 +587,13 @@ class RepoPage {
     if (kind === 'repo' && target) this.filePath = target;
     const refresh = model === this.model && kind === this.kind && this.pair !== undefined;
     if (kind !== this.kind) { this.closeFull(); this.setKind(kind); }
+    // A direct link to a lower effort must reveal the selected run.
+    if (model && model !== PREP && !this.highestModels.has(model)) {
+      this.highestOnly.checked = false;
+      repoHighestOnly = false;
+    }
     this.refreshTabs();
+    this.modelPicker.refresh(model?.short);
     for (const b of this.tabs.querySelectorAll('button')) b.setAttribute('aria-pressed', String(model && b.dataset.short === model.short));
     for (const a of this.viewTabs.children) a.href = `#/${a.dataset.view}/${this.id}/${model?.short || '-'}`;
     if (model !== this.model || this.pair === undefined) {
@@ -580,7 +671,7 @@ class RepoPage {
       return;
     }
     if (res.status === 'pending') {
-      this.outcome.replaceChildren(h('p', { class: 'muted' }, `${m.label}'s run on this repository is not finished yet.`));
+      this.outcome.replaceChildren(h('p', { class: 'muted' }, `${modelLabel(m)}'s run on this repository is not finished yet.`));
       return;
     }
     if (res.status !== 'passed') {
@@ -589,7 +680,7 @@ class RepoPage {
           stat('Before', `${tokens(this.repo.tokens)} tokens`), stat('Result', 'Failed verification', cssVar('--bad')),
           stat('Score', '0%'), stat('Cost', usd(res.cost)), stat('Duration', hours(res.seconds / 3600))),
         h('p', { class: 'muted', style: { fontSize: '0.8rem', margin: 0, flex: '1', minWidth: 'min(100%, 22rem)' } },
-          `${m.label}'s submission did not pass verification, so it scores 0. The trace shows how the run went.`));
+          `${modelLabel(m)}'s submission did not pass verification, so it scores 0. The trace shows how the run went.`));
       return;
     }
     this.outcome.replaceChildren(
@@ -597,7 +688,7 @@ class RepoPage {
         stat('Before', `${tokens(this.repo.tokens)} tokens`), stat('After', `${tokens(res.post)} tokens`),
         stat('Score', pct(res.score), modelColor(m)), heartbeatStat(this.repo.heartbeats, res),
         stat('Cost', usd(res.cost)), stat('Duration', hours(res.seconds / 3600))),
-      res.origin ? originStrip(res.origin, this.repo.tokens, m.label) : null);
+      res.origin ? originStrip(res.origin, this.repo.tokens, modelLabel(m)) : null);
   }
 
   renderLegend() {

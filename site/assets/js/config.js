@@ -2,7 +2,7 @@
 // tools, limits, the task prompt and the harness's own system prompt. Every
 // value comes from the frozen run manifests (pipeline/export_benchmark.py,
 // run_configs); the system prompts load only when one is opened.
-import { h, load, logo, usd } from './util.js?v=bfbc7385b9';
+import { h, load, logo, usd, modelLabel } from './util.js?v=452a427dad';
 
 let dialog = null;
 
@@ -25,14 +25,13 @@ function taskPrompt(prompt, shared) {
   });
 }
 
-function settingRow(s, harness) {
-  const how = s.how_label || (s.how === 'ours' ? 'set by us' : `${harness} default`);
+function settingRow(s) {
+  const note = s.note;
   return h('div', { class: 'cfg-row' },
     h('dt', {}, s.label),
     h('dd', {},
       h('span', { class: 'cfg-val' }, number(s.value)),
-      h('span', { class: `cfg-how ${s.how}` }, how),
-      s.note ? h('p', { class: 'cfg-note' }, s.note) : null));
+      note ? h('p', { class: 'cfg-note' }, note) : null));
 }
 
 function systemPrompt(model, config) {
@@ -74,21 +73,18 @@ export function openModelConfig(board, short, onClose) {
     h('header', { style: { '--model': model.color } },
       logo(model, 'sm'),
       h('div', { class: 'title' },
-        h('h2', { id: 'cfg-title' }, model.label),
+        h('h2', { id: 'cfg-title' }, modelLabel(model)),
         h('p', {}, `${model.provider} · ${config.harness} ${config.harness_version} · ${effort.value} effort`)),
       h('button', { type: 'button', class: 'close', 'aria-label': 'Close', onclick: () => dialog.close() }, '×')),
     h('div', { class: 'cfg-body' },
       h('section', {},
-        h('h3', {}, 'Generation'),
-        h('p', { class: 'cfg-lede' }, `We set the reasoning effort. Everything else is ${config.harness}'s default, unless marked “set by us”. Sampling parameters it did not send are not listed.`),
+        h('h3', {}, 'Model Configuration'),
         h('dl', { class: 'cfg-list' },
           h('div', { class: 'cfg-row' }, h('dt', {}, 'Harness'), h('dd', {}, h('span', { class: 'cfg-val' }, `${config.harness} ${config.harness_version}`))),
-          config.settings.map((s) => settingRow(s, config.harness)))),
+          config.settings.map(settingRow))),
       h('section', {},
         h('h3', {}, 'Tools'),
-        h('p', { class: 'cfg-lede' }, config.tools_how === 'ours'
-          ? `We limited ${config.harness} to these ${config.tools.length} tools.`
-          : `${config.harness}'s default tool set (${config.tools.length} tools).`),
+        h('p', { class: 'cfg-lede' }, `Tools available to ${config.harness} in these runs (${config.tools.length} tools).`),
         h('ul', { class: 'cfg-tools' }, config.tools.map((t) => h('li', {}, h('code', {}, t)))),
         config.tools_note ? h('p', { class: 'cfg-note' }, config.tools_note) : null,
         h('p', { class: 'cfg-note' }, 'From the shell, every agent could also run ', h('code', {}, 'lake'), ', ', h('code', {}, 'lean_verify'), ' and ',

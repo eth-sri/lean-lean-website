@@ -12,7 +12,7 @@
 // A node's area is its size in Lean tokens; its shape is its kind: theorems
 // are circles, definitions squares, anything else (notation, macros, axioms)
 // triangles.
-import { cssVar } from './util.js?v=bfbc7385b9';
+import { cssVar } from './util.js?v=452a427dad';
 
 export const STATUS = ['unchanged', 'rewritten', 'structural', 'deleted', 'dead', 'comments'];
 
@@ -172,6 +172,17 @@ export class GraphView {
       this.r[i] = before || c === 'deleted' || c === 'dead' ? this.rBefore[i]
         : this.phase === 'after' || c === 'added' ? this.rAfter[i] : Math.max(this.rBefore[i], this.rAfter[i]);
     }
+    // The exported world includes space for lane labels. On phones, fit the
+    // visible declarations themselves so that spare space cannot offset them.
+    let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
+    for (let i = 0; i < this.N; i++) {
+      if (!this.visible(i)) continue;
+      const rx = this.r[i] * HALF_WIDTH[this.shapes[i]];
+      const ry = this.r[i] * (this.shapes[i] === 2 ? 1.555 : 1);
+      left = Math.min(left, this.x[i] - rx); right = Math.max(right, this.x[i] + rx);
+      top = Math.min(top, this.y[i] - ry); bottom = Math.max(bottom, this.y[i] + ry);
+    }
+    this.nodeBounds = Number.isFinite(left) ? [left, top, right - left, bottom - top] : null;
     this.cell = 28;
     this.grid = new Map();
     for (let i = 0; i < this.N; i++) {
@@ -245,7 +256,7 @@ export class GraphView {
       dead: cssVar('--g-dead'), added: cssVar('--g-added'),
       ink: cssVar('--ink'), edge: cssVar('--muted'),
       surface: cssVar('--surface'), accent: cssVar('--accent'), users: cssVar('--g-users'), muted: cssVar('--muted'),
-      rule: cssVar('--rule'), band: cssVar('--accent-soft'), sunk: cssVar('--sunk'),
+      sunk: cssVar('--sunk'),
     };
     this.colors.pale = mix(this.colors.modified, this.colors.surface, 0.38);
     this.nodeColor = Array.from({ length: this.N }, (_, i) => this.colorOf(i));
@@ -308,15 +319,17 @@ export class GraphView {
     this.request();
   }
 
+  fitBounds() { return this.fitToNodes && this.nodeBounds ? this.nodeBounds : [0, 0, ...this.world()]; }
   fitK() {
-    const [ww, wh] = this.world();
+    const [, , ww, wh] = this.fitBounds();
     return Math.min((this.w - 24) / ww, (this.h - this.pad.top - this.pad.bottom) / wh);
   }
   fit() {
     if (!this.w || !this.graph) return;
-    const [ww, wh] = this.world();
+    const [left, top, ww, wh] = this.fitBounds();
     const k = this.fitK();
-    this.view = { k, x: (this.w - ww * k) / 2, y: this.pad.top + Math.max(0, (this.h - this.pad.top - this.pad.bottom - wh * k) / 2) };
+    this.view = { k, x: (this.w - ww * k) / 2 - left * k,
+      y: this.pad.top + Math.max(0, (this.h - this.pad.top - this.pad.bottom - wh * k) / 2) - top * k };
     this.request();
   }
   focus(i) {
@@ -438,23 +451,18 @@ export class GraphView {
     const { k, x, y } = this.view;
     const [ww] = this.world();
     const lanes = this.phaseLanes();
-    // Section bands.
+    // Background bands only for removed or added sections.
     let i = 0;
     while (i < lanes.length) {
       let j = i;
       while (j + 1 < lanes.length && lanes[j + 1].status === lanes[i].status) j++;
       const top = (lanes[i].y - 17) * k + y, bottom = (lanes[j].y + 17) * k + y;
-      if (lanes[i].status !== 'kept' && lanes[i].status !== 'inserted') {
-        ctx.fillStyle = lanes[i].status === 'protected' ? this.colors.band : this.colors.sunk;
+      if (!['kept', 'inserted', 'protected'].includes(lanes[i].status)) {
+        ctx.fillStyle = this.colors.sunk;
         ctx.fillRect(x, top, ww * k, bottom - top);
       }
       i = j + 1;
     }
-    ctx.strokeStyle = this.colors.rule;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (const lane of lanes) { const ly = Math.round(lane.y * k + y) + 0.5; ctx.moveTo(x, ly); ctx.lineTo(x + ww * k, ly); }
-    ctx.stroke();
   }
 
   drawLaneLabels(ctx) {

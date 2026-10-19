@@ -14,6 +14,27 @@ python3 serve.py 8000
 Then open <http://localhost:8000>. The site is plain HTML, CSS and JavaScript in `site/`,
 with its data already built in `site/data/`.
 
+## Paper page
+
+`site/paper.html` is a static abstract and citation page next to `site/paper.pdf`.
+It loads no JavaScript, benchmark data, or external assets. Update the title, authors,
+year, abstract, and citation URL in `pipeline/paper.json`, then run:
+
+```bash
+python3 pipeline/build_paper.py
+python3 pipeline/stamp_assets.py
+```
+
+This also updates the paper metadata used by the benchmark. The full build runs
+both steps, and CI checks that the generated files are current.
+
+## Public data
+
+Before publishing refreshed data, run `python3 pipeline/anonymize_paths.py` to
+replace usernames in local home-directory paths with `user`. It updates compressed
+trace packs and their byte-range indexes together. Run it with `--check` to verify
+that no further replacements are needed.
+
 ## License
 
 - **Code** (the website): MIT License, see `LICENSE`.
