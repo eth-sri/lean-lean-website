@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=7d28928b13';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=747ada19d5';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -286,7 +286,8 @@ export function renderLeaderboard(view, bench) {
 
   const hero = h('section', { class: 'hero' },
     h('h1', {}, PAPER_TITLE),
-    h('p', { class: 'authors' }, AUTHORS.join(', ')),
+    h('p', { class: 'authors' }, AUTHORS.map((author, i) =>
+      [i ? ', ' : '', h('a', { href: author.url }, author.name)])),
     h('div', { class: 'logos' },
       h('a', { href: 'https://www.sri.inf.ethz.ch', target: '_blank', rel: 'noopener' }, h('img', { src: 'assets/sri-logo.svg', alt: 'SRI Lab', width: 136, height: 24 })),
       h('a', { href: 'https://ethz.ch', target: '_blank', rel: 'noopener' }, h('img', { src: 'assets/eth-logo.svg', alt: 'ETH Zurich', width: 144, height: 24 }))),

@@ -3,19 +3,23 @@
   "authors": [
     {
       "given": "Kári",
-      "family": "Rögnvaldsson"
+      "family": "Rögnvaldsson",
+      "url": "https://www.sri.inf.ethz.ch/people/kari"
     },
     {
       "given": "Niels",
-      "family": "Mündler-Sasahara"
+      "family": "Mündler-Sasahara",
+      "url": "https://www.sri.inf.ethz.ch/people/niels"
     },
     {
       "given": "Jasper",
-      "family": "Dekoninck"
+      "family": "Dekoninck",
+      "url": "https://www.sri.inf.ethz.ch/people/jasper"
     },
     {
       "given": "Martin",
-      "family": "Vechev"
+      "family": "Vechev",
+      "url": "https://www.sri.inf.ethz.ch/people/martin"
     }
   ],
   "year": 2026,

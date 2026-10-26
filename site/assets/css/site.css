@@ -99,6 +99,8 @@ main { display: block; outline: none; }
 @media (min-width: 641px) { .hero { gap: 20px; padding-top: 8px; } }
 .hero h1 em { color: var(--accent); }
 .hero .authors { margin-top: -10px; color: var(--ink-2); font-size: 1rem; }
+.authors a { color: inherit; text-decoration: none; }
+.authors a:hover, .authors a:focus-visible { text-decoration: underline; }
 .hero .logos { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: -4px; }
 .hero .logos img { display: block; height: 13px; width: auto; }
 @media (min-width: 641px) {
