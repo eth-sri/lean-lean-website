@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=640659c0e5';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=ddb552918a';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -316,7 +316,7 @@ export function renderLeaderboard(view, bench) {
       heroLink(DATASET_URL, 'huggingface', 'Benchmark')),
     h('p', { class: 'hero-intro' },
       'As AI generates ever larger formal proofs, the next challenge is to make them concise and reusable. ',
-      'In LeanLean, models are evaluated on how good they are at shortening large proofs.'));
+      'In LeanLean, models are evaluated on shortening large proofs.'));
 
   // From 760px both panels show, the frontier first; on a phone they are tabs,
   // opening on the frontier, with the leaderboard's summary and per-repository
