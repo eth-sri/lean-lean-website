@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=747ada19d5';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=53afb214c3';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -153,7 +153,7 @@ function frontierChart(models) {
     }
     svg.append(grid,
       s('text', { class: 'axis-title', x: L - (narrow ? 30 : 38), y: T - 14 }, 'Score (%)'),
-      s('text', { class: 'axis-title', x: R, y: H - 6, 'text-anchor': 'end' }, 'Cost per repository (USD, log scale)'),
+      s('text', { class: 'axis-title cost-axis-title', x: R, y: H - 6, 'text-anchor': 'end' }, 'Cost per repository (USD)'),
       ...families.map((family) => s('polyline', { class: 'effort-line', stroke: modelColor(family[0]),
         'aria-label': `${family[0].label}: ${family.map((m) => m.effort).join(' → ')}`,
         points: family.map((m) => `${x(m.cost)},${y(m.score)}`).join(' ') })));
@@ -294,22 +294,25 @@ export function renderLeaderboard(view, bench) {
     h('div', { class: 'hero-links' },
       heroLink(PAPER_URL, 'paper', 'Paper'),
       heroLink(CODE_URL, 'github', 'Code'),
-      heroLink(DATASET_URL, 'huggingface', 'Benchmark')));
+      heroLink(DATASET_URL, 'huggingface', 'Benchmark')),
+    h('p', { class: 'hero-intro' },
+      'As AI generates ever larger formal proofs, the next challenge is to make them concise and reusable. ',
+      'In LeanLean, models are evaluated on how good they are at shortening large proofs.'));
 
   // From 760px both panels show, the frontier first; on a phone they are tabs,
   // opening on the frontier, with the leaderboard's summary and per-repository
   // columns as separate tabs (see site.css).
   const board = boardTable(bench);
   const chart = frontierChart(models);
-  // How a score is counted: from 760px above the frontier chart, on a phone below
-  // each tab's chart or table (see site.css).
+  // Explain the score below the chart, and below the table on phones.
   const scoreNote = 'Score is mean Lean token compression across repositories. A failed build or Comparator check scores zero.';
+  const boardHeader = h('div', { class: 'board-header' }, h('h2', {}, 'Leaderboard'));
   const panels = {
     board: h('div', { class: 'result-panel board-panel', id: 'results-board', role: 'tabpanel' },
-      h('h2', {}, 'Leaderboard'), board, h('p', { class: 'tab-note' }, scoreNote)),
+      boardHeader, board, h('p', { class: 'tab-note' }, scoreNote)),
     frontier: h('div', { class: 'result-panel frontier-panel', id: 'results-frontier', role: 'tabpanel' },
-      h('div', { class: 'panel-head' }, h('h2', {}, 'Frontier'), h('p', {}, scoreNote)),
-      chart, h('p', { class: 'tab-note' }, scoreNote)),
+      h('figure', { class: 'frontier-figure' }, chart,
+        h('figcaption', {}, h('span', {}, scoreNote), h('span', { class: 'frontier-cost-label' }, 'Cost per repository (USD)')))),
   };
   const body = h('div', { class: 'results-body', 'data-tab': 'frontier' }, panels.frontier, panels.board);
   const tabs = [['frontier', 'Frontier', panels.frontier], ['summary', 'Leaderboard', panels.board], ['repos', 'Per repository', panels.board]]
@@ -327,11 +330,11 @@ export function renderLeaderboard(view, bench) {
   };
   const highestOnly = h('input', { type: 'checkbox', role: 'switch', checked: true, onchange: updateFilter });
   updateFilter();
-  const filter = h('label', { class: 'results-filter' }, highestOnly, h('span', {}, 'Show only highest reasoning levels'));
+  const filter = h('label', { class: 'results-filter' }, highestOnly, h('span', {}, 'Only highest reasoning'));
   const results = h('section', { class: 'section results', 'aria-label': 'Results' },
     h('div', { class: 'results-tabs', role: 'tablist', 'aria-label': 'Results' }, tabs),
     body);
-  panels.board.insertBefore(filter, board);
+  boardHeader.append(filter);
 
   view.replaceChildren(h('div', { class: 'page' }, hero, results));
 }
