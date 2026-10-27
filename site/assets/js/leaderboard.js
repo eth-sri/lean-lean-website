@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=7d28928b13';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=2f62e74ebb';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -123,7 +123,7 @@ function frontierChart(models) {
     const narrow = W < 560;
     // A wide chart (a desktop) sets its labels a size up; see .chart.frontier .large in site.css.
     const large = W >= 760, fs = large ? 16 : 12;
-    const H = +host.dataset.height || (narrow ? (pts.length > 15 ? 620 : pts.length > 10 ? 460 : 300) : W < 900 ? 360 : 400);
+    const H = +host.dataset.height || (narrow ? (pts.length > 10 ? 620 : 300) : W < 900 ? 360 : 400);
     const L = narrow ? 36 : 44, R = W - (narrow ? 10 : 18), T = 30, B = H - 42;
     const S = +host.dataset.mark || (narrow ? 16 : 18), icon = Math.round(S * 0.58);
     const costs = pts.map((m) => m.cost);
@@ -171,19 +171,36 @@ function frontierChart(models) {
       const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 4);
       return Array.from({ length: n + 1 }, (_, k) => ({ x: x0 + ((x1 - x0) * k) / n - 3, y: y0 + ((y1 - y0) * k) / n - 3, w: 6, h: 6 }));
     }));
-    const inside = (a) => a.x >= L - 4 && a.x + a.w <= W - 2 && a.y >= T - 6 && a.y + a.h <= B + 4;
-    const order = [...pts].sort((a, b) => b.score - a.score);
+    // The page padding can hold the last few pixels of a mobile label. Keeping
+    // it close to its marker is clearer than moving it several score bands away.
+    const labelRight = narrow ? Math.min(W + 12, window.innerWidth - host.getBoundingClientRect().left - 4) : W - 2;
+    const inside = (a) => a.x >= (narrow ? 4 : L - 4) && a.x + a.w <= labelRight && a.y >= T - 6 && a.y + a.h <= B + 4;
+    // Reserve the crowded cluster before the other mobile labels, so the
+    // highest-scoring point cannot push its neighbours across the chart.
+    const mobilePriority = ['gpt-6.1-sol-medium', 'gpt-6.1-sol-max', 'opus-5.5-medium', 'gemini-4-argon'];
+    const priority = (m) => narrow && mobilePriority.includes(m.key) ? mobilePriority.indexOf(m.key) : mobilePriority.length;
+    const order = [...pts].sort((a, b) => priority(a) - priority(b) || b.score - a.score);
     const options = order.map((m) => {
       const cx = x(m.cost), cy = y(m.score), r = S / 2 + 6, e = S / 2;
-      const w = measure.measureText(modelLabel(m)).width + 4, lh = fs * 1.5, mid = cy + fs / 3;
-      const above = { y: cy - r - lh + 2, ty: cy - r - 1 }, below = { y: cy + r - 2, ty: cy + r + fs - 3 };
-      // Keep the Sol ablation labels above and flush with their mark's right edge.
-      const fixed = ['gpt-6.1-sol-medium', 'gpt-6.1-sol-high', 'gpt-6.1-sol', 'gpt-6.1-sol-max'].includes(m.key)
+      const w = measure.measureText(modelLabel(m)).width + (narrow ? 2 : 4), lh = fs * 1.5, mid = cy + fs / 3;
+      const above = { ty: cy - r - 3 }, below = { ty: cy + r + fs + 1 };
+      // Prefer consistent placements for the reasoning variants, with alternate
+      // positions available when another model crowds that part of the chart.
+      const solAbove = ['gpt-6.1-sol-medium', 'gpt-6.1-sol-high', 'gpt-6.1-sol', 'gpt-6.1-sol-max'].includes(m.key);
+      const aligned = narrow
+        ? { x: cx - w / 2, anchor: 'middle', tx: cx }
+        : { x: cx - e, anchor: 'start', tx: cx - e };
+      const preferred = m.key === 'gemini-4-argon'
+        ? narrow
+          ? { x: cx - e + 4, anchor: 'start', tx: cx - e + 4, ty: below.ty }
+          : { ...aligned, ty: below.ty }
+        : m.key === 'opus-5.5-medium'
+        ? { ...aligned, ty: above.ty - lh * (narrow ? 2 : 1), leader: true }
+        : solAbove
         ? { x: cx + e - w, anchor: 'end', tx: cx + e, ty: above.ty }
-        : m.key === 'opus-5.5-medium' || m.key === 'opus-5.5-low'
-          ? { x: cx - e, anchor: 'start', tx: cx - e, ty: below.ty } : null;
-      if (fixed) return [{ ...fixed, y: fixed.ty - fs * 1.1, w, h: lh }];
+        : !narrow && m.key === 'opus-5.5-low' ? { ...aligned, ty: below.ty } : null;
       return [
+        ...(preferred ? [preferred] : []),
         { x: cx + r, y: cy - lh / 2, anchor: 'start', tx: cx + r, ty: mid },
         { x: cx - r - w, y: cy - lh / 2, anchor: 'end', tx: cx - r, ty: mid },
         { ...below, x: cx - w / 2, anchor: 'middle', tx: cx },
@@ -199,9 +216,19 @@ function frontierChart(models) {
           { x: cx - r - w, anchor: 'end', tx: cx - r, ty: mid + k * lh, leader: true },
           { x: cx - w / 2, anchor: 'middle', tx: cx, ty: mid + k * lh, leader: true },
         ]),
-      ].map((o) => ({ ...o, y: o.ty - fs * 1.1, w, h: lh }));
+      ].map((o) => ({ ...o, y: o.ty - fs * 1.1, w, h: lh, model: m.key }))
+        .filter((o) => m.key === 'gemini-4-argon' ? o.y >= cy + S / 2 + 2
+          : (!narrow && solAbove) || ['gpt-6.1-sol-medium', 'gpt-6.1-sol-max', 'opus-5.5-medium'].includes(m.key)
+            ? o.y + o.h <= cy - S / 2 - 2 : true)
+        .filter((o) => !narrow || m.key !== 'gpt-6.1-sol-medium' || !o.leader);
     });
-    const free = (o, placed) => inside(o) && ![...boxes, ...placed, ...line].some((b) => hits(o, b));
+    const free = (o, placed) => {
+      if (narrow && o.model === 'opus-5.5-medium') {
+        const sol = placed.find((b) => b.model === 'gpt-6.1-sol-max');
+        if (sol && o.y + o.h + 6 > sol.y) return false;
+      }
+      return inside(o) && ![...boxes, ...placed, ...line].some((b) => hits(o, b));
+    };
     // A step budget keeps a crowded chart from searching every combination.
     let budget = 20000;
     const place = (i, placed) => {
@@ -217,10 +244,11 @@ function frontierChart(models) {
       [...placed, opts.find((o) => free(o, placed)) || opts.find(inside) || opts[0]], []);
     order.forEach((m, i) => {
       const pick = picks[i];
-      if (pick.leader) svg.append(s('line', { class: 'label-leader', x1: x(m.cost), y1: y(m.score),
-        x2: pick.tx, y2: pick.ty - fs / 3 }));
+      if (pick.leader) svg.append(s('line', { class: 'label-leader', 'data-model': m.key, x1: x(m.cost), y1: y(m.score),
+        x2: Math.max(pick.x, Math.min(x(m.cost), pick.x + pick.w)),
+        y2: Math.max(pick.y, Math.min(y(m.score), pick.y + pick.h)) }));
       svg.append(s('text', { class: 'label', x: pick.tx, y: pick.ty,
-        'text-anchor': pick.anchor, onmousemove: tip(m), onmouseleave: hideTip }, modelLabel(m)));
+        'data-model': m.key, 'text-anchor': pick.anchor, onmousemove: tip(m), onmouseleave: hideTip }, modelLabel(m)));
     });
 
     for (const m of pts) {

@@ -2,7 +2,7 @@
 // tools, limits, the task prompt and the harness's own system prompt. Every
 // value comes from the frozen run manifests (pipeline/export_benchmark.py,
 // run_configs); the system prompts load only when one is opened.
-import { h, load, logo, usd, modelLabel } from './util.js?v=7d28928b13';
+import { h, load, logo, usd, modelLabel } from './util.js?v=2f62e74ebb';
 
 let dialog = null;
 
@@ -89,7 +89,7 @@ export function openModelConfig(board, short, onClose) {
         config.tools_note ? h('p', { class: 'cfg-note' }, config.tools_note) : null,
         h('p', { class: 'cfg-note' }, 'From the shell, every agent could also run ', h('code', {}, 'lake'), ', ', h('code', {}, 'lean_verify'), ' and ',
           h('code', {}, 'python3 proof_length.py'), '. ',
-          'We turned off skills, MCP servers and subagents for every agent.')),
+          config.restrictions_note || 'We turned off skills, MCP servers and subagents for every agent.')),
       h('section', {},
         h('h3', {}, 'Limits'),
         h('dl', { class: 'cfg-list' },

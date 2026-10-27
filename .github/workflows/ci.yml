@@ -19,7 +19,12 @@ jobs:
             site/viewer.html
             site/paper.html
           sparse-checkout-cone-mode: false
-      - name: Public-data anonymization preserves trace packs
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install sync test dependency
+        run: python3 -m pip install PyYAML==6.0.3
+      - name: Result sync and public-data anonymization
         run: python3 -m unittest discover -s pipeline -p 'test_*.py'
       - name: Paper page and metadata are current
         run: |

@@ -6,7 +6,7 @@ __pycache__/
 hidden/
 .claude/
 
-# The data export pipeline is kept out of this repository.
+# Legacy paper exporters and their dependencies stay local.
 /build.sh
 /pyproject.toml
 /uv.lock
@@ -20,6 +20,15 @@ hidden/
 # Public-data anonymization, including trace pack indexes.
 !/pipeline/anonymize_paths.py
 !/pipeline/test_anonymize_paths.py
+
+# Repeatable result sync; inputs, staging and cache stay under hidden/.
+!/pipeline/sync_results.py
+!/pipeline/sync_models.json
+!/pipeline/export_traces.py
+!/pipeline/test_sync_results.py
+!/pipeline/graph_data.py
+!/pipeline/sync_graphs.py
+!/pipeline/test_sync_graphs.py
 
 # Social preview generated during each Pages deployment.
 !/pipeline/build_og.py
