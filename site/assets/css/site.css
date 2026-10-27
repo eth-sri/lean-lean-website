@@ -800,10 +800,10 @@ table.lb .fx-time { width: 54px; min-width: 54px; text-align: right; padding-rig
 @media (min-width: 760px) {
   table.lb .fx-cost, table.lb .fx-time { position: sticky; }
   table.lb .fx-rank { width: 26px; min-width: 26px; }
-  table.lb .fx-model { left: 26px; width: 136px; min-width: 136px; }
-  table.lb .fx-score { left: 162px; width: 118px; min-width: 118px; padding-right: 10px; border-right: 0; }
-  table.lb .fx-cost { left: 280px; width: 50px; min-width: 50px; }
-  table.lb .fx-time { left: 330px; width: 50px; min-width: 50px; border-right: 1px solid var(--rule); }
+  table.lb .fx-model { left: 26px; width: 208px; min-width: 208px; }
+  table.lb .fx-score { left: 234px; width: 118px; min-width: 118px; padding-right: 10px; border-right: 0; }
+  table.lb .fx-cost { left: 352px; width: 50px; min-width: 50px; }
+  table.lb .fx-time { left: 402px; width: 50px; min-width: 50px; border-right: 1px solid var(--rule); }
   .lb-scroll.scrolled table.lb .fx-score { box-shadow: none; }
   .lb-scroll.scrolled table.lb .fx-time { box-shadow: 6px 0 10px -6px rgb(0 0 0 / 0.18); }
 }
@@ -811,7 +811,8 @@ table.lb tbody td { height: 40px; border-top: 1px solid var(--rule); }
 table.lb tbody tr:hover td { background: var(--sunk); }
 table.lb .model-cell { gap: 7px; }
 table.lb .model-cell b { font-size: 0.78rem; font-weight: 400; white-space: normal; }
-table.lb .model-name { display: grid; min-width: 0; line-height: 1.15; }
+table.lb .model-name { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0; line-height: 1.15; }
+table.lb .reasoning-badge { display: inline-block; flex: none; padding: 2px 7px; border: 1px solid var(--rule); border-radius: 999px; background: var(--sunk); color: var(--ink-2); font-size: 0.6875rem; line-height: 1.2; white-space: nowrap; }
 table.lb .model-name small { font-size: 0.68rem; color: var(--muted); }
 /* The score over a thin bar on a phone; bar and score side by side from 760px. */
 table.lb .scorebar { min-width: 0; flex-direction: column-reverse; align-items: stretch; gap: 4px; }

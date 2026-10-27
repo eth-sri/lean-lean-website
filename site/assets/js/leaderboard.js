@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=53afb214c3';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=9fc9c75bfa';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -47,7 +47,8 @@ function boardTable(bench) {
     tbody.replaceChildren(...rows.map((m) => h('tr', { style: { '--model': modelColor(m) } },
       h('td', { class: 'fx fx-rank' }, m.rank),
       h('td', { class: 'fx fx-model' }, h('a', { class: 'model-cell model-link', href: `#/model/${m.short}`, title: `${modelLabel(m)}: harness, settings, tools and prompts` },
-        logo(m, 'xs'), h('div', { class: 'model-name' }, h('b', {}, modelLabel(m))))),
+        logo(m, 'xs'), h('div', { class: 'model-name' }, h('b', {}, m.label),
+          m.effort ? h('span', { class: 'reasoning-badge', title: `Reasoning effort: ${m.effort}`, 'aria-label': `Reasoning effort: ${m.effort}` }, m.effort) : null))),
       h('td', { class: 'fx fx-score' }, h('div', { class: 'scorebar' },
         h('div', { class: 'track' }, h('div', { class: 'fill', style: { width: `${Math.max(0, Math.min(100, m.score))}%` } })), h('b', {}, pct(m.score)))),
       h('td', { class: 'fx fx-cost num' }, usd(m.cost)),
