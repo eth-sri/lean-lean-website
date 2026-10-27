@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=f5a13cc48d';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=a6e027bdab';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -47,8 +47,7 @@ function boardTable(bench) {
     tbody.replaceChildren(...rows.map((m) => h('tr', { style: { '--model': modelColor(m) } },
       h('td', { class: 'fx fx-rank' }, m.rank),
       h('td', { class: 'fx fx-model' }, h('a', { class: 'model-cell model-link', href: `#/model/${m.short}`, title: `${modelLabel(m)}: harness, settings, tools and prompts` },
-        logo(m, 'xs'), h('div', { class: 'model-name' }, h('b', {}, m.label),
-          m.effort ? h('span', { class: 'reasoning-badge', title: `Reasoning effort: ${m.effort}`, 'aria-label': `Reasoning effort: ${m.effort}` }, m.effort) : null))),
+        logo(m, 'xs'), h('div', { class: 'model-name' }, h('b', {}, modelLabel(m))))),
       h('td', { class: 'fx fx-score' }, h('div', { class: 'scorebar' },
         h('div', { class: 'track' }, h('div', { class: 'fill', style: { width: `${Math.max(0, Math.min(100, m.score))}%` } })), h('b', {}, pct(m.score)))),
       h('td', { class: 'fx fx-cost num' }, usd(m.cost)),
@@ -104,6 +103,8 @@ function frontierChart(models) {
   }
   const families = [...groups.values()].filter((family) => family.length > 1)
     .map((family) => family.sort((a, b) => EFFORTS.indexOf(a.effort) - EFFORTS.indexOf(b.effort)));
+  const ablations = new Set(families.flat());
+  const frontierLabel = (m) => ablations.has(m) ? modelLabel(m) : m.label;
   const measure = document.createElement('canvas').getContext('2d');
   const tip = (m) => (e) => showTip(e, `<span>${esc(modelLabel(m))}</span>`
     + `<div class="row"><span>Score</span><span>${pct(m.score)}</span></div>`
@@ -163,14 +164,7 @@ function frontierChart(models) {
     // above, then below or above flush with either edge), placed from the top
     // score down so leaders get first pick, backtracking when a later label
     // would find no free spot.
-    const badgeFs = large ? 11 : 9, badgeHeight = badgeFs + 6, badgeGap = 5;
-    const labelSizes = new Map(pts.map((m) => {
-      measure.font = `400 ${fs}px ${cssVar('--font-ui')}`;
-      const nameWidth = measure.measureText(m.label).width;
-      measure.font = `400 ${badgeFs}px ${cssVar('--font-ui')}`;
-      const badgeWidth = m.effort ? measure.measureText(m.effort).width + 12 : 0;
-      return [m, { nameWidth, badgeWidth, width: nameWidth + (badgeWidth ? badgeGap + badgeWidth : 0) }];
-    }));
+    measure.font = `400 ${fs}px ${cssVar('--font-ui')}`;
     const boxes = pts.map((m) => ({ x: x(m.cost) - S / 2 - 2, y: y(m.score) - S / 2 - 2, w: S + 4, h: S + 4 }));
     const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
     // Sample the effort lines so labels keep clear of them too.
@@ -190,7 +184,7 @@ function frontierChart(models) {
     const order = [...pts].sort((a, b) => priority(a) - priority(b) || b.score - a.score);
     const options = order.map((m) => {
       const cx = x(m.cost), cy = y(m.score), r = S / 2 + 6, e = S / 2;
-      const w = labelSizes.get(m).width + (narrow ? 2 : 4), lh = fs * 1.5, mid = cy + fs / 3;
+      const w = measure.measureText(frontierLabel(m)).width + (narrow ? 2 : 4), lh = fs * 1.5, mid = cy + fs / 3;
       const above = { ty: cy - r - 3 }, below = { ty: cy + r + fs + 1 };
       // Prefer consistent placements for the reasoning variants, with alternate
       // positions available when another model crowds that part of the chart.
@@ -255,18 +249,8 @@ function frontierChart(models) {
       if (pick.leader) svg.append(s('line', { class: 'label-leader', 'data-model': m.key, x1: x(m.cost), y1: y(m.score),
         x2: Math.max(pick.x, Math.min(x(m.cost), pick.x + pick.w)),
         y2: Math.max(pick.y, Math.min(y(m.score), pick.y + pick.h)) }));
-      const { nameWidth, badgeWidth, width } = labelSizes.get(m);
-      const left = pick.tx - (pick.anchor === 'end' ? width : pick.anchor === 'middle' ? width / 2 : 0);
-      const label = s('g', { class: 'frontier-model-label', 'data-model': m.key, transform: `translate(${left},${pick.ty})`,
-        onmousemove: tip(m), onmouseleave: hideTip }, s('text', { class: 'label' }, m.label));
-      if (m.effort) {
-        const badgeX = nameWidth + badgeGap, centerY = -fs / 3;
-        label.append(s('g', { class: 'frontier-reasoning-badge' },
-          s('title', {}, `Reasoning effort: ${m.effort}`),
-          s('rect', { x: badgeX, y: centerY - badgeHeight / 2, width: badgeWidth, height: badgeHeight, rx: badgeHeight / 2 }),
-          s('text', { x: badgeX + badgeWidth / 2, y: centerY + badgeFs * 0.35, 'text-anchor': 'middle' }, m.effort)));
-      }
-      svg.append(label);
+      svg.append(s('text', { class: 'label', x: pick.tx, y: pick.ty,
+        'data-model': m.key, 'text-anchor': pick.anchor, onmousemove: tip(m), onmouseleave: hideTip }, frontierLabel(m)));
     });
 
     for (const m of pts) {

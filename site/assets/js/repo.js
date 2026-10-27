@@ -1,7 +1,7 @@
-import { h, load, loadChunk, logo, modelColor, modelLabel, highestReasoningModels, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=f5a13cc48d';
-import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=f5a13cc48d';
-import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=f5a13cc48d';
-import { TraceView } from './trace.js?v=f5a13cc48d';
+import { h, load, loadChunk, logo, modelColor, modelLabel, highestReasoningModels, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=a6e027bdab';
+import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=a6e027bdab';
+import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=a6e027bdab';
+import { TraceView } from './trace.js?v=a6e027bdab';
 
 const CATEGORY_TEXT = {
   unchanged: 'Unchanged', modified: 'Modified', comments: 'Comments or layout only', deleted: 'Deleted', dead: 'Dead code, removed', added: 'Added',
