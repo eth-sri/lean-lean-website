@@ -98,7 +98,10 @@ main { display: block; outline: none; }
 .hero h1 { font-size: clamp(1.85rem, 4.2vw, 2.6rem); }
 @media (min-width: 641px) { .hero { gap: 20px; padding-top: 8px; } }
 .hero h1 em { color: var(--accent); }
+.hero-intro { max-width: 72ch; font-size: var(--step-1); }
 .hero .authors { margin-top: -10px; color: var(--ink-2); font-size: 1rem; }
+.authors a { color: inherit; text-decoration: none; }
+.authors a:hover, .authors a:focus-visible { text-decoration: underline; }
 .hero .logos { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: -4px; }
 .hero .logos img { display: block; height: 13px; width: auto; }
 @media (min-width: 641px) {
@@ -701,6 +704,7 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 
 /* ── results: the frontier above the leaderboard; on a phone, two tabs ── */
 .results-body { display: grid; gap: 48px; min-width: 0; }
+.board-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .results-filter { display: flex; align-items: center; gap: 10px; width: fit-content; max-width: 100%; cursor: pointer; color: var(--ink-2); font-size: 0.875rem; }
 .results-filter input {
   appearance: none; flex: none; width: 34px; height: 20px; margin: 0; border: 1px solid var(--rule-strong);
@@ -719,8 +723,12 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 /* The panel titles take the section-heading size (they only show from 760px). */
 .result-panel { display: grid; gap: 20px; min-width: 0; }
 .result-panel h2 { font-size: 1.75rem; }
-.panel-head { display: grid; gap: 6px; }
-.panel-head p, .tab-note { max-width: 64ch; color: var(--ink-2); }
+.tab-note { max-width: 64ch; color: var(--ink-2); }
+.frontier-figure { display: grid; gap: 8px; margin: 0; min-width: 0; }
+.frontier-figure .cost-axis-title { display: none; }
+.frontier-figure .chart { margin-bottom: -20px; }
+.frontier-figure figcaption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; color: var(--ink-2); font-size: var(--step--1); }
+.frontier-cost-label { margin-left: auto; white-space: nowrap; }
 .results-tabs { display: flex; gap: clamp(10px, 3.5vw, 18px); border-bottom: 1px solid var(--rule); }
 .results-tabs button {
   border: 0; background: none; cursor: pointer; padding: 6px 0 8px; margin-bottom: -1px;
@@ -731,7 +739,7 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 @media (min-width: 760px) { .results-tabs, .tab-note { display: none; } }
 @media (max-width: 759.98px) {
   .result-panel { gap: 12px; }
-  .result-panel h2, .panel-head,
+  .result-panel h2,
   .results-body[data-tab="frontier"] .board-panel,
   .results-body:not([data-tab="frontier"]) .frontier-panel { display: none; }
 }
@@ -742,6 +750,9 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 .chart.frontier .large text { font-size: 13px; }
 .chart.frontier .large .axis-title { font-size: 14px; }
 .chart.frontier .large .label { font-size: 16px; }
+.chart.frontier .frontier-reasoning-badge rect { fill: var(--sunk); stroke: var(--rule); stroke-width: 1px; }
+.chart.frontier .frontier-reasoning-badge text { fill: var(--ink-2); font-size: 9px; }
+.chart.frontier .large .frontier-reasoning-badge text { font-size: 11px; }
 .chart.frontier .label-leader { stroke: var(--ink-2); stroke-width: 0.75; opacity: 0.5; pointer-events: none; }
 .chart.frontier .pt:hover rect { stroke-width: 2.5; }
 .chart.frontier .effort-line { fill: none; stroke-width: 1.75; stroke-linejoin: round; opacity: 0.75; }
@@ -792,10 +803,10 @@ table.lb .fx-time { width: 54px; min-width: 54px; text-align: right; padding-rig
 @media (min-width: 760px) {
   table.lb .fx-cost, table.lb .fx-time { position: sticky; }
   table.lb .fx-rank { width: 26px; min-width: 26px; }
-  table.lb .fx-model { left: 26px; width: 136px; min-width: 136px; }
-  table.lb .fx-score { left: 162px; width: 118px; min-width: 118px; padding-right: 10px; border-right: 0; }
-  table.lb .fx-cost { left: 280px; width: 50px; min-width: 50px; }
-  table.lb .fx-time { left: 330px; width: 50px; min-width: 50px; border-right: 1px solid var(--rule); }
+  table.lb .fx-model { left: 26px; width: 208px; min-width: 208px; }
+  table.lb .fx-score { left: 234px; width: 118px; min-width: 118px; padding-right: 10px; border-right: 0; }
+  table.lb .fx-cost { left: 352px; width: 50px; min-width: 50px; }
+  table.lb .fx-time { left: 402px; width: 50px; min-width: 50px; border-right: 1px solid var(--rule); }
   .lb-scroll.scrolled table.lb .fx-score { box-shadow: none; }
   .lb-scroll.scrolled table.lb .fx-time { box-shadow: 6px 0 10px -6px rgb(0 0 0 / 0.18); }
 }
@@ -803,7 +814,8 @@ table.lb tbody td { height: 40px; border-top: 1px solid var(--rule); }
 table.lb tbody tr:hover td { background: var(--sunk); }
 table.lb .model-cell { gap: 7px; }
 table.lb .model-cell b { font-size: 0.78rem; font-weight: 400; white-space: normal; }
-table.lb .model-name { display: grid; min-width: 0; line-height: 1.15; }
+table.lb .model-name { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0; line-height: 1.15; }
+table.lb .reasoning-badge { display: inline-block; flex: none; padding: 2px 7px; border: 1px solid var(--rule); border-radius: 999px; background: var(--sunk); color: var(--ink-2); font-size: 0.6875rem; line-height: 1.2; white-space: nowrap; }
 table.lb .model-name small { font-size: 0.68rem; color: var(--muted); }
 /* The score over a thin bar on a phone; bar and score side by side from 760px. */
 table.lb .scorebar { min-width: 0; flex-direction: column-reverse; align-items: stretch; gap: 4px; }
