@@ -1,7 +1,7 @@
-import { h, load, loadChunk, logo, modelColor, modelLabel, highestReasoningModels, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=2f62e74ebb';
-import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=2f62e74ebb';
-import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=2f62e74ebb';
-import { TraceView } from './trace.js?v=2f62e74ebb';
+import { h, load, loadChunk, logo, modelColor, modelLabel, highestReasoningModels, pct, usd, hours, tokens, int, signedInt, signedPct, seg, esc, showTip, hideTip, cssVar, ramp, ORIGIN, ASSETS } from './util.js?v=70f770e949';
+import { GraphView, STATUS, shapeOf, radius } from './graph.js?v=70f770e949';
+import { codeBlock, diffBlock, splitBlock, hunksBlock, wholeFileBlock } from './code.js?v=70f770e949';
+import { TraceView } from './trace.js?v=70f770e949';
 
 const CATEGORY_TEXT = {
   unchanged: 'Unchanged', modified: 'Modified', comments: 'Comments or layout only', deleted: 'Deleted', dead: 'Dead code, removed', added: 'Added',
@@ -1111,13 +1111,12 @@ class RepoPage {
 // user unit, the one maxHeartbeats counts; imports excluded), with the change. Not every passing
 // submission is measured yet.
 function heartbeatStat(before, res) {
-  if (before == null) return null;
   const after = res.heartbeats_after;
-  const title = after == null ? `${int(before)} heartbeats before; the submission is not measured yet`
-    : `${int(before)} → ${int(after)} heartbeats to elaborate the repository's own declarations (imports excluded)`;
+  if (before == null || after == null) return null;
+  const title = `${int(before)} → ${int(after)} heartbeats to elaborate the repository's own declarations (imports excluded)`;
   return h('div', { class: 'stat', title }, h('span', {}, 'Heartbeats'),
-    h('b', {}, `${tokens(before)} → ${after == null ? '—' : tokens(after)}`,
-      after == null ? null : h('small', {}, signedPct(-res.heartbeats, 1))));
+    h('b', {}, `${tokens(before)} → ${tokens(after)}`,
+      h('small', {}, signedPct(-res.heartbeats, 1))));
 }
 
 function row(label, value) { return h('div', { class: 'row' }, h('span', {}, label), h('span', {}, value)); }
