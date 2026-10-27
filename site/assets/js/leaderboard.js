@@ -1,4 +1,4 @@
-import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=9fc9c75bfa';
+import { h, s, logo, logoMarkup, modelColor, modelLabel, EFFORTS, highestReasoningModels, cssVar, pct, usd, hours, tokens, ramp, inkOn, esc, showTip, hideTip, AUTHORS, PAPER_TITLE, PAPER_URL, CODE_URL, DATASET_URL, CITATION, CONTACT_EMAIL, ORIGIN } from './util.js?v=640659c0e5';
 
 function sectionHead(eyebrow, title, text) {
   return h('div', { class: 'section-head' },
@@ -163,7 +163,14 @@ function frontierChart(models) {
     // above, then below or above flush with either edge), placed from the top
     // score down so leaders get first pick, backtracking when a later label
     // would find no free spot.
-    measure.font = `400 ${fs}px ${cssVar('--font-ui')}`;
+    const badgeFs = large ? 11 : 9, badgeHeight = badgeFs + 6, badgeGap = 5;
+    const labelSizes = new Map(pts.map((m) => {
+      measure.font = `400 ${fs}px ${cssVar('--font-ui')}`;
+      const nameWidth = measure.measureText(m.label).width;
+      measure.font = `400 ${badgeFs}px ${cssVar('--font-ui')}`;
+      const badgeWidth = m.effort ? measure.measureText(m.effort).width + 12 : 0;
+      return [m, { nameWidth, badgeWidth, width: nameWidth + (badgeWidth ? badgeGap + badgeWidth : 0) }];
+    }));
     const boxes = pts.map((m) => ({ x: x(m.cost) - S / 2 - 2, y: y(m.score) - S / 2 - 2, w: S + 4, h: S + 4 }));
     const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
     // Sample the effort lines so labels keep clear of them too.
@@ -176,15 +183,16 @@ function frontierChart(models) {
     const order = [...pts].sort((a, b) => b.score - a.score);
     const options = order.map((m) => {
       const cx = x(m.cost), cy = y(m.score), r = S / 2 + 6, e = S / 2;
-      const w = measure.measureText(modelLabel(m)).width + 4, lh = fs * 1.5, mid = cy + fs / 3;
+      const w = labelSizes.get(m).width + 4, lh = fs * 1.5, mid = cy + fs / 3;
       const above = { y: cy - r - lh + 2, ty: cy - r - 1 }, below = { y: cy + r - 2, ty: cy + r + fs - 3 };
-      // Keep the Sol ablation labels above and flush with their mark's right edge.
+      // Prefer Sol ablation labels above their marks, allowing alternatives on crowded charts.
       const fixed = ['gpt-6.1-sol-medium', 'gpt-6.1-sol-high', 'gpt-6.1-sol', 'gpt-6.1-sol-max'].includes(m.key)
         ? { x: cx + e - w, anchor: 'end', tx: cx + e, ty: above.ty }
         : m.key === 'opus-5.5-medium' || m.key === 'opus-5.5-low'
           ? { x: cx - e, anchor: 'start', tx: cx - e, ty: below.ty } : null;
-      if (fixed) return [{ ...fixed, y: fixed.ty - fs * 1.1, w, h: lh }];
+      if (fixed && !narrow) return [{ ...fixed, y: fixed.ty - fs * 1.1, w, h: lh }];
       return [
+        ...(fixed ? [fixed] : []),
         { x: cx + r, y: cy - lh / 2, anchor: 'start', tx: cx + r, ty: mid },
         { x: cx - r - w, y: cy - lh / 2, anchor: 'end', tx: cx - r, ty: mid },
         { ...below, x: cx - w / 2, anchor: 'middle', tx: cx },
@@ -220,8 +228,18 @@ function frontierChart(models) {
       const pick = picks[i];
       if (pick.leader) svg.append(s('line', { class: 'label-leader', x1: x(m.cost), y1: y(m.score),
         x2: pick.tx, y2: pick.ty - fs / 3 }));
-      svg.append(s('text', { class: 'label', x: pick.tx, y: pick.ty,
-        'text-anchor': pick.anchor, onmousemove: tip(m), onmouseleave: hideTip }, modelLabel(m)));
+      const { nameWidth, badgeWidth, width } = labelSizes.get(m);
+      const left = pick.tx - (pick.anchor === 'end' ? width : pick.anchor === 'middle' ? width / 2 : 0);
+      const label = s('g', { class: 'frontier-model-label', transform: `translate(${left},${pick.ty})`,
+        onmousemove: tip(m), onmouseleave: hideTip }, s('text', { class: 'label' }, m.label));
+      if (m.effort) {
+        const badgeX = nameWidth + badgeGap, centerY = -fs / 3;
+        label.append(s('g', { class: 'frontier-reasoning-badge' },
+          s('title', {}, `Reasoning effort: ${m.effort}`),
+          s('rect', { x: badgeX, y: centerY - badgeHeight / 2, width: badgeWidth, height: badgeHeight, rx: badgeHeight / 2 }),
+          s('text', { x: badgeX + badgeWidth / 2, y: centerY + badgeFs * 0.35, 'text-anchor': 'middle' }, m.effort)));
+      }
+      svg.append(label);
     });
 
     for (const m of pts) {

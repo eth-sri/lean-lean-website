@@ -1,4 +1,4 @@
-import { h } from './util.js?v=9fc9c75bfa';
+import { h } from './util.js?v=640659c0e5';
 
 // Small, sourced excerpts link to the benchmark runs they illustrate.
 const EXAMPLE = 'palomar__2026-09-01-000010/opus';

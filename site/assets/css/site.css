@@ -750,6 +750,9 @@ ul.tree .state.added { border-color: var(--g-added); background: color-mix(in sr
 .chart.frontier .large text { font-size: 13px; }
 .chart.frontier .large .axis-title { font-size: 14px; }
 .chart.frontier .large .label { font-size: 16px; }
+.chart.frontier .frontier-reasoning-badge rect { fill: var(--sunk); stroke: var(--rule); stroke-width: 1px; }
+.chart.frontier .frontier-reasoning-badge text { fill: var(--ink-2); font-size: 9px; }
+.chart.frontier .large .frontier-reasoning-badge text { font-size: 11px; }
 .chart.frontier .label-leader { stroke: var(--ink-2); stroke-width: 0.75; opacity: 0.5; pointer-events: none; }
 .chart.frontier .pt:hover rect { stroke-width: 2.5; }
 .chart.frontier .effort-line { fill: none; stroke-width: 1.75; stroke-linejoin: round; opacity: 0.75; }
