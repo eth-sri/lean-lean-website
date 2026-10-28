@@ -14,11 +14,11 @@ python3 serve.py 8000
 Then open <http://localhost:8000>. The site is plain HTML, CSS and JavaScript in `site/`,
 with its data already built in `site/data/`.
 
-## Paper page
+## Paper metadata
 
-`site/paper.html` is a static abstract and citation page next to `site/paper.pdf`.
-It loads no JavaScript, benchmark data, or external assets. Update the title, authors,
-year, abstract, and citation URL in `pipeline/paper.json`, then run:
+The homepage's Paper button links to the SRI publication page via `paper_url` in
+`pipeline/paper.json`. Update the title, authors, year, paper link, and citation URL
+there, then run:
 
 ```bash
 python3 pipeline/build_paper.py

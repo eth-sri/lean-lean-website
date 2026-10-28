@@ -17,7 +17,6 @@ jobs:
             site/assets
             site/index.html
             site/viewer.html
-            site/paper.html
           sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v6
         with:
@@ -26,10 +25,10 @@ jobs:
         run: python3 -m pip install PyYAML==6.0.3
       - name: Result sync and public-data anonymization
         run: python3 -m unittest discover -s pipeline -p 'test_*.py'
-      - name: Paper page and metadata are current
+      - name: Paper metadata is current
         run: |
           python3 pipeline/build_paper.py
-          git diff --exit-code || { echo "::error::Stale paper page. Run: python3 pipeline/build_paper.py"; exit 1; }
+          git diff --exit-code || { echo "::error::Stale paper metadata. Run: python3 pipeline/build_paper.py"; exit 1; }
       - name: Asset version stamps are current
         run: |
           python3 pipeline/stamp_assets.py
