@@ -5,7 +5,7 @@
 export const PAPER_TITLE = "LeanLean: Benchmarking Repository-Scale Lean Proof Compression";
 export const AUTHORS = [{"name": "Kári Rögnvaldsson", "url": "https://www.sri.inf.ethz.ch/people/kari"}, {"name": "Niels Mündler-Sasahara", "url": "https://www.sri.inf.ethz.ch/people/niels"}, {"name": "Jasper Dekoninck", "url": "https://www.sri.inf.ethz.ch/people/jasper"}, {"name": "Martin Vechev", "url": "https://www.sri.inf.ethz.ch/people/martin"}];
 export const PAPER_URL = "paper.html";
-export const CITATION = "@misc{leanlean2026,\n  title  = {{LeanLean}: Benchmarking Repository-Scale {Lean} Proof Compression},\n  author = {R{\\\"o}gnvaldsson, K{\\'a}ri and M{\\\"u}ndler-Sasahara, Niels and Dekoninck, Jasper and Vechev, Martin},\n  year   = {2026},\n  note   = {Preprint},\n  url    = {https://leanleanbench.com/paper.pdf}\n}";
+export const CITATION = "@misc{leanlean2026,\n  title  = {{LeanLean}: Benchmarking Repository-Scale {Lean} Proof Compression},\n  author = {R{\\\"o}gnvaldsson, K{\\'a}ri and M{\\\"u}ndler-Sasahara, Niels and Dekoninck, Jasper and Vechev, Martin},\n  year   = {2026},\n  note   = {Preprint},\n  url    = {https://files.sri.inf.ethz.ch/website/papers/rognvaldsson2026leanlean.pdf}\n}";
 // END GENERATED PAPER METADATA
 export const AFFILIATION = 'SRI Lab, ETH Zurich';
 export const CONTACT_EMAIL = 'kari.roegnvaldsson@inf.ethz.ch';

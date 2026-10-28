@@ -1,13 +1,13 @@
 // Landing page and model configuration dialogs. Legacy result links redirect to the explorer.
-import { h, load, publishedBenchmark, registerLogos } from './util.js?v=a6e027bdab';
-import { renderLeaderboard, renderMethod, renderCitation } from './leaderboard.js?v=a6e027bdab';
-import { renderExplore } from './explore.js?v=a6e027bdab';
+import { h, load, publishedBenchmark, registerLogos } from './util.js?v=c15f312012';
+import { renderLeaderboard, renderMethod, renderCitation } from './leaderboard.js?v=c15f312012';
+import { renderExplore } from './explore.js?v=c15f312012';
 
 const view = document.getElementById('view');
 let board = null;
 let boardEl = null;
 let openedFrom = null;
-const loadConfig = () => import('./config.js?v=a6e027bdab');
+const loadConfig = () => import('./config.js?v=c15f312012');
 const RESULTS_STATE = 'leanlean.results.v1';
 
 const styled = () => getComputedStyle(document.documentElement).getPropertyValue('--z0').trim() !== '';
