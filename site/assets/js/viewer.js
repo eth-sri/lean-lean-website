@@ -1,6 +1,6 @@
 // Standalone graph, diff and trace explorer. Hashes retain the existing shareable run format.
-import { h, load, publishedBenchmark, preloadLogos } from './util.js?v=89314b1a4b';
-import { renderRepository } from './repo.js?v=89314b1a4b';
+import { h, load, publishedBenchmark, preloadLogos } from './util.js?v=e38b2b7f7d';
+import { renderRepository } from './repo.js?v=e38b2b7f7d';
 
 const panel = document.getElementById('repository');
 const EXAMPLE_HASH = '#/graph/palomar__2026-09-01-000010/opus';

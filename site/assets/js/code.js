@@ -1,5 +1,5 @@
 // Lean 4 code rendering: a small line highlighter, snippet diffs, unified hunks.
-import { h, esc } from './util.js?v=89314b1a4b';
+import { h, esc } from './util.js?v=e38b2b7f7d';
 
 const KEYWORDS = new Set(('theorem lemma def abbrev instance structure class inductive where by have show from fun let in match with ' +
   'if then else do return namespace section end open variable variables universe import private protected noncomputable ' +
